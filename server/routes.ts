@@ -272,7 +272,7 @@ export function registerRoutes(app: Express) {
     try {
       const { verified, verifiedGender } = req.body;
       
-      const user = await storage.updateUser(req.params.id, { verified, verifiedGender });
+      const user = await storage.updateUser(req.params.id as string, { verified, verifiedGender });
       
       res.json({ user: { ...user, password: undefined } });
     } catch (error: any) {
@@ -284,7 +284,7 @@ export function registerRoutes(app: Express) {
     try {
       const { blocked } = req.body;
       
-      const user = await storage.updateUser(req.params.id, { blocked });
+      const user = await storage.updateUser(req.params.id as string, { blocked });
       
       res.json({ user: { ...user, password: undefined } });
     } catch (error: any) {
@@ -296,7 +296,7 @@ export function registerRoutes(app: Express) {
     try {
       const { subscriptionStatus, subscriptionExpiryDate } = req.body;
       
-      const user = await storage.updateUser(req.params.id, { 
+      const user = await storage.updateUser(req.params.id as string, { 
         subscriptionStatus,
         subscriptionExpiryDate: subscriptionExpiryDate ? new Date(subscriptionExpiryDate) : undefined,
       });
@@ -319,7 +319,7 @@ export function registerRoutes(app: Express) {
   app.put('/api/admin/price-activations/:id/approve', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
     try {
       const { userId } = req.body;
-      await storage.approvePriceActivation(req.params.id, userId);
+      await storage.approvePriceActivation(req.params.id as string, userId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -344,7 +344,7 @@ export function registerRoutes(app: Express) {
       else if (plan === '3 Days') expiryDate.setDate(expiryDate.getDate() + 3);
       else if (plan === '7 Days') expiryDate.setDate(expiryDate.getDate() + 7);
       
-      await storage.approveFeaturedRequest(req.params.id, userId, expiryDate);
+      await storage.approveFeaturedRequest(req.params.id as string, userId, expiryDate);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -437,7 +437,7 @@ export function registerRoutes(app: Express) {
       
       const msg = await storage.sendMessage({
         senderId: req.user.id,
-        receiverId: req.params.userId,
+        receiverId: req.params.userId as string,
         message,
         messageType: messageType || 'text',
         attachment,
@@ -451,7 +451,7 @@ export function registerRoutes(app: Express) {
 
   app.put('/api/messages/read/:senderId', authMiddleware, async (req: AuthRequest, res) => {
     try {
-      await storage.markMessagesAsRead(req.user.id, req.params.senderId);
+      await storage.markMessagesAsRead(req.user.id, req.params.senderId as string);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
