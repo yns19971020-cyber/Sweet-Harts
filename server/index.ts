@@ -12,7 +12,7 @@ import { sql } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.NODE_ENV === 'production' ? 5000 : 3001;
 
 async function initDatabase() {
   console.log('Initializing database...');
@@ -217,18 +217,31 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 
-app.use(express.static('public'));
-app.use('/src', express.static('src'));
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+  app.use(express.static('dist'));
+  app.use(express.static('public'));
+} else {
+  app.use(express.static('public'));
+  app.use('/src', express.static('src'));
+}
 
 registerRoutes(app);
 
 app.get('/', (req, res) => {
-  res.sendFile(path.join(process.cwd(), 'index.html'));
+  if (isProduction) {
+    res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
+  } else {
+    res.sendFile(path.join(process.cwd(), 'index.html'));
+  }
 });
 
 app.use((req, res) => {
   if (req.path.endsWith('.html')) {
     res.sendFile(path.join(process.cwd(), 'public', req.path));
+  } else if (isProduction) {
+    res.sendFile(path.join(process.cwd(), 'dist', 'index.html'));
   } else {
     res.sendFile(path.join(process.cwd(), 'index.html'));
   }
