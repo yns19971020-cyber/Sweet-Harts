@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard - PrivateConnect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../src/index.css">
+</head>
+<body class="bg-gray-50">
+  <div class="min-h-screen py-8 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-white shadow rounded-lg overflow-hidden">
+        <!-- Header -->
+        <div class="bg-blue-600 px-6 py-4">
+          <h1 class="text-2xl font-bold text-white">My Dashboard</h1>
+          <p class="text-blue-100 text-sm">Manage your profile and settings</p>
+        </div>
+
+        <!-- Wallet & Balance -->
+        <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-green-50 to-blue-50">
+          <h2 class="text-lg font-semibold mb-4">💰 මුදල් පසුම්බිය (My Wallet)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="bg-white border-2 border-green-500 rounded-lg p-4">
+              <p class="text-sm text-gray-600">ශේෂය (Available Balance)</p>
+              <p id="walletBalance" class="text-3xl font-bold text-green-600">$0.00</p>
+            </div>
+            <div class="bg-white border rounded-lg p-4">
+              <p class="text-sm text-gray-600">Subscription Status</p>
+              <p id="subscriptionStatus" class="text-lg font-semibold">Loading...</p>
+              <p id="subscriptionExpiry" class="text-xs text-gray-500 mt-1"></p>
+            </div>
+          </div>
+          <div class="mt-4 flex gap-3">
+            <button id="btnWithdraw" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
+              💸 මුදල් ගන්න (Withdraw)
+            </button>
+            <button id="btnBankSettings" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+              🏦 බැංකු ගිණුම (Bank Account)
+            </button>
+          </div>
+        </div>
+
+        <!-- Account Status -->
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">Account Status</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="border rounded-lg p-4">
+              <p class="text-sm text-gray-600">Verification Status</p>
+              <p id="verificationStatus" class="text-lg font-semibold">Loading...</p>
+            </div>
+            <div class="border rounded-lg p-4">
+              <p class="text-sm text-gray-600">Category</p>
+              <p id="userCategory" class="text-lg font-semibold">Loading...</p>
+            </div>
+            <div class="border rounded-lg p-4">
+              <p class="text-sm text-gray-600">Location</p>
+              <p id="userLocation" class="text-lg font-semibold">Loading...</p>
+            </div>
+            <div class="border rounded-lg p-4">
+              <p class="text-sm text-gray-600">Price Activation</p>
+              <p id="priceActivationStatus" class="text-lg font-semibold">Loading...</p>
+            </div>
+            <div class="border rounded-lg p-4">
+              <p class="text-sm text-gray-600">Featured Status</p>
+              <p id="featuredStatus" class="text-lg font-semibold">Loading...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Activation Section -->
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">💰 Price Activation</h2>
+          
+          <div id="activationForm">
+            <p class="text-sm text-gray-600 mb-4">To set your own prices, you must first activate your paid profile by paying the platform activation fee.</p>
+            
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Payment Method *</label>
+                <select id="paymentMethod" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <option value="">-- Select Payment Method --</option>
+                  <option value="Bank Transfer">Bank Transfer (Sri Lanka)</option>
+                  <option value="Binance">Binance (USDT - TXID)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Transaction Reference / TXID *</label>
+                <input id="transactionRef" type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Enter transaction ID">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Payment Proof (Screenshot) *</label>
+                <input id="paymentProof" type="file" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700">
+              </div>
+
+              <button id="btnSubmitActivation" class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700">
+                Submit Activation Request
+              </button>
+            </div>
+          </div>
+
+          <div id="activationPending" class="hidden">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <p class="text-yellow-800">⏳ Your activation request is pending admin approval. Please wait 24-48 hours.</p>
+            </div>
+          </div>
+
+          <div id="activationApproved" class="hidden">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <p class="text-green-800">✅ Your price activation has been approved! You can now set your prices below.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Price Settings (visible only after activation) -->
+        <div id="priceSettingSection" class="hidden p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">💵 Set Your Prices</h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Private Chat Price (Rs.)</label>
+              <input id="chatPriceInput" type="number" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 500">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Voice Call Price (Rs.)</label>
+              <input id="voicePriceInput" type="number" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 1000">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700">Video Call Price (Rs.)</label>
+              <input id="videoPriceInput" type="number" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 2000">
+            </div>
+
+            <button id="btnSavePrices" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
+              Save Prices
+            </button>
+          </div>
+        </div>
+
+        <!-- Featured Ads / Boost Section -->
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">⭐ Boost / Feature My Profile</h2>
+          <p class="text-sm text-gray-600 mb-4">Boost your profile to appear at the top of listings with a featured badge for better visibility.</p>
+          
+          <div id="boostForm">
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Boost Plan *</label>
+                <select id="boostPlan" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <option value="">-- Select Boost Duration --</option>
+                  <option value="24 Hours">24 Hours - Rs. 500</option>
+                  <option value="3 Days">3 Days - Rs. 1200</option>
+                  <option value="7 Days">7 Days - Rs. 2500</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Payment Method *</label>
+                <select id="boostPaymentMethod" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+                  <option value="">-- Select Payment Method --</option>
+                  <option value="Bank Transfer">Bank Transfer (Sri Lanka)</option>
+                  <option value="Binance">Binance (USDT - TXID)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Transaction Reference / TXID *</label>
+                <input id="boostTransactionRef" type="text" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="Enter transaction ID">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700">Payment Proof (Screenshot) *</label>
+                <input id="boostPaymentProof" type="file" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700">
+              </div>
+
+              <button id="btnSubmitBoost" class="w-full bg-yellow-500 text-white py-2 px-4 rounded-md hover:bg-yellow-600 font-semibold">
+                Submit Boost Request
+              </button>
+            </div>
+          </div>
+
+          <div id="boostPending" class="hidden">
+            <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+              <p class="text-yellow-800">⏳ Your boost request is pending admin approval. You'll be featured once approved.</p>
+            </div>
+          </div>
+
+          <div id="boostActive" class="hidden">
+            <div class="bg-green-50 border border-green-200 rounded-md p-4">
+              <p class="text-green-800 font-semibold">⭐ Your profile is currently FEATURED!</p>
+              <p class="text-sm text-green-700 mt-1">Expires: <span id="boostExpiry"></span></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-lg font-semibold mb-4">📊 ගනුදෙනු ඉතිහාසය (Transaction History)</h2>
+          <div id="transactionHistory" class="space-y-2">
+            <p class="text-sm text-gray-500 text-center py-4">No transactions yet</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="p-6 flex gap-4">
+          <a href="../index.html" class="flex-1 bg-gray-200 text-gray-800 text-center py-2 px-4 rounded-md hover:bg-gray-300">
+            Back to Home
+          </a>
+          <button id="btnLogout" class="flex-1 bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700">
+            Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="../src/dashboard.js"></script>
+</body>
+</html>

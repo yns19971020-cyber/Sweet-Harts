@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - PrivateConnect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../src/index.css">
+</head>
+<body class="bg-gray-50">
+  <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-lg">
+      <div>
+        <h2 class="text-center text-3xl font-bold text-gray-900">Create Account</h2>
+        <p class="mt-2 text-center text-sm text-gray-600">Join PrivateConnect - 18+ Only</p>
+      </div>
+      
+      <form id="registerForm" class="mt-8 space-y-6">
+        <div class="space-y-4">
+          <!-- Username -->
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-700">Username *</label>
+            <input id="username" name="username" type="text" required 
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <!-- Email -->
+          <div>
+            <label for="email" class="block text-sm font-medium text-gray-700">Email *</label>
+            <input id="email" name="email" type="email" required 
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <!-- Password -->
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-700">Password *</label>
+            <input id="password" name="password" type="password" required 
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+          </div>
+
+          <!-- Gender -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+            <div class="flex gap-4">
+              <label class="inline-flex items-center">
+                <input type="radio" name="gender" value="Male" required class="form-radio text-blue-600">
+                <span class="ml-2">Male</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input type="radio" name="gender" value="Female" required class="form-radio text-blue-600">
+                <span class="ml-2">Female</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Category Selection (MANDATORY) -->
+          <div>
+            <label for="category" class="block text-sm font-medium text-gray-700">Category * (Required)</label>
+            <select id="category" name="category" required 
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">-- Select Category --</option>
+              <option value="Girls Personal">Girls Personal</option>
+              <option value="Boys Personal">Boys Personal</option>
+              <option value="Live Cam">Live Cam</option>
+              <option value="Spa">Spa</option>
+              <option value="Verified Profiles">Verified Profiles</option>
+              <option value="Others">Others</option>
+            </select>
+          </div>
+
+          <!-- Location Selection (MANDATORY) -->
+          <div>
+            <label for="location" class="block text-sm font-medium text-gray-700">Location / District * (Required)</label>
+            <select id="location" name="location" required 
+              class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+              <option value="">-- Select Location --</option>
+              <option value="Colombo">Colombo</option>
+              <option value="Gampaha">Gampaha</option>
+              <option value="Kalutara">Kalutara</option>
+              <option value="Kandy">Kandy</option>
+              <option value="Matale">Matale</option>
+              <option value="Nuwara Eliya">Nuwara Eliya</option>
+              <option value="Galle">Galle</option>
+              <option value="Matara">Matara</option>
+              <option value="Hambantota">Hambantota</option>
+              <option value="Jaffna">Jaffna</option>
+              <option value="Kilinochchi">Kilinochchi</option>
+              <option value="Mannar">Mannar</option>
+              <option value="Vavuniya">Vavuniya</option>
+              <option value="Mullaitivu">Mullaitivu</option>
+              <option value="Batticaloa">Batticaloa</option>
+              <option value="Ampara">Ampara</option>
+              <option value="Trincomalee">Trincomalee</option>
+              <option value="Kurunegala">Kurunegala</option>
+              <option value="Puttalam">Puttalam</option>
+              <option value="Anuradhapura">Anuradhapura</option>
+              <option value="Polonnaruwa">Polonnaruwa</option>
+              <option value="Badulla">Badulla</option>
+              <option value="Monaragala">Monaragala</option>
+              <option value="Ratnapura">Ratnapura</option>
+              <option value="Kegalle">Kegalle</option>
+            </select>
+          </div>
+
+          <!-- LIVE SELFIE CAMERA (MANDATORY - NO UPLOAD) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              📸 Live Selfie වරිපිකේශන් * (MANDATORY - Camera Only)
+            </label>
+            <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-2">
+              <p class="text-xs text-blue-800">
+                ⚠️ <strong>අනිවාර්‍යයි:</strong> කැමරාවෙන් LIVE selfie එකක් ගන්න.<br>
+                🚫 Photo upload නොමිලේ - කැමරා එක පමණක්!<br>
+                🔐 HTTPS හෝ localhost අවශ්‍යයි camera සඳහා.<br>
+                💡 VS Code හෝ local server භාවිතා කරන්න හෝ site එක publish කරන්න.
+              </p>
+            </div>
+            <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-2 mb-2">
+              <p class="text-xs text-yellow-800">
+                🛠️ <strong>Debug Mode ON:</strong> Browser console එක open කර camera logs බලන්න (F12 press කරන්න)
+              </p>
+            </div>
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-4">
+              <video id="cameraPreview" class="w-full h-64 bg-black rounded hidden" autoplay playsinline></video>
+              <canvas id="capturedPhoto" class="w-full h-64 bg-gray-100 rounded hidden"></canvas>
+              <div id="cameraPlaceholder" class="text-center py-12">
+                <div class="text-6xl mb-2">📸</div>
+                <p class="text-sm text-gray-600 mb-2 font-semibold">මුහුණ සහිත Live Selfie ගන්න</p>
+                <p class="text-xs text-blue-600 mb-1">✅ Front Camera එක පමණක් භාවිතා වේ</p>
+                <p class="text-xs text-red-600 font-semibold">🚫 Photo Upload තහනම් - Camera පමණක්!</p>
+              </div>
+              <div class="flex flex-col gap-2 mt-3">
+                <button type="button" id="btnOpenCamera" class="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 font-semibold">
+                  📷 කැමරාව විවෘත කරන්න (Open Camera)
+                </button>
+                <button type="button" id="btnCapture" class="w-full px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 font-semibold hidden">
+                  ✓ ඡායාරූපය ගන්න (Capture Photo)
+                </button>
+                <button type="button" id="btnRetake" class="w-full px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 font-semibold hidden">
+                  🔄 නැවත ගන්න (Retake)
+                </button>
+              </div>
+              <div class="mt-2 space-y-2">
+                <div class="text-center">
+                  <p class="text-xs text-gray-500">
+                    📌 Camera වැඩ නොකළහොත්: Browser console (F12) බලන්න හෝ site එක <strong>Publish</strong> කර test කරන්න
+                  </p>
+                </div>
+                <div class="bg-gray-50 border border-gray-200 rounded p-2">
+                  <p class="text-xs font-semibold mb-1">🔧 Troubleshooting:</p>
+                  <ul class="text-xs text-gray-600 space-y-1">
+                    <li>✓ Browser console logs බලන්න (F12 > Console tab)</li>
+                    <li>✓ Camera permissions "Allow" කර ඇද්ද බලන්න</li>
+                    <li>✓ වෙනත් apps කැමරාව භාවිතා නොකරන බව පරීක්ෂා කරන්න</li>
+                    <li>✓ HTTPS හෝ localhost භාවිතා කරන්න</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="selfieData" required>
+          </div>
+
+          <!-- Subscription Plan Selection -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">සාමාජික සැලැස්ම තෝරන්න * (Select Subscription Plan)</label>
+            <div class="space-y-2">
+              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                <input type="radio" name="plan" value="1month" data-price="25" required class="mr-3">
+                <div class="flex-1">
+                  <div class="font-semibold">1 මාසය - $25</div>
+                  <div class="text-xs text-gray-600">1 Month Plan - $25 USD</div>
+                </div>
+              </label>
+              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                <input type="radio" name="plan" value="3months" data-price="50" class="mr-3">
+                <div class="flex-1">
+                  <div class="font-semibold">3 මාස - $50</div>
+                  <div class="text-xs text-gray-600">3 Months Plan - $50 USD</div>
+                </div>
+              </label>
+              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                <input type="radio" name="plan" value="6months" data-price="75" class="mr-3">
+                <div class="flex-1">
+                  <div class="font-semibold">6 මාස - $75</div>
+                  <div class="text-xs text-gray-600">6 Months Plan - $75 USD</div>
+                </div>
+              </label>
+              <label class="flex items-center p-3 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition">
+                <input type="radio" name="plan" value="12months" data-price="100" class="mr-3">
+                <div class="flex-1">
+                  <div class="font-semibold">12 මාස - $100 (වඩාත්ම ජනප්‍රිය)</div>
+                  <div class="text-xs text-gray-600">12 Months Plan - $100 USD (Most Popular)</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">ගෙවීමේ ක්‍රමය * (Payment Method)</label>
+            <select id="paymentMethod" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md">
+              <option value="">-- ගෙවීමේ ක්‍රමය තෝරන්න --</option>
+              <option value="bank_sampath">Sampath Bank - 105057458082 (J A Y S Kavinda)</option>
+              <option value="bank_commercial">Commercial Bank - 8007739640 (J A Y S Kavinda)</option>
+              <option value="binance">Binance (USDT - TXID)</option>
+              <option value="online">Online Payment</option>
+            </select>
+          </div>
+
+          <!-- Payment Details -->
+          <div id="paymentDetails" class="hidden bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="font-semibold mb-2">💳 ගෙවීමේ විස්තර (Payment Details)</h4>
+            <div id="bankDetails" class="text-sm space-y-1">
+              <!-- Bank details will be shown here based on selection -->
+            </div>
+            <div class="mt-3">
+              <label class="block text-sm font-medium mb-1">ගනුදෙනු අංකය / TXID *</label>
+              <input type="text" id="transactionRef" class="w-full px-3 py-2 border rounded-md" placeholder="Enter Transaction ID">
+            </div>
+          </div>
+
+          <!-- Age Confirmation -->
+          <div>
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="ageConfirm" required class="form-checkbox text-blue-600">
+              <span class="ml-2 text-sm">මම වයස අවුරුදු 18 ට වැඩි බව සහතික කරමි * (I confirm I am 18 years or older)</span>
+            </label>
+          </div>
+
+          <!-- Terms Acceptance -->
+          <div>
+            <label class="inline-flex items-center">
+              <input type="checkbox" id="termsAccept" required class="form-checkbox text-blue-600">
+              <span class="ml-2 text-sm">Subscription plan payment සහ wallet system නීතිරීති වලට එකඟ වෙමි *</span>
+            </label>
+          </div>
+        </div>
+
+        <div>
+          <button type="submit" 
+            class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            Register
+          </button>
+        </div>
+
+        <div class="text-center">
+          <a href="../index.html" class="text-sm text-blue-600 hover:text-blue-800">Already have an account? Login</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="../src/register.js"></script>
+</body>
+</html>

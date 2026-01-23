@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - PrivateConnect</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="../src/index.css">
+</head>
+<body class="bg-gray-50">
+  <!-- Header -->
+  <header class="bg-white shadow-sm border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <div class="text-2xl font-bold text-blue-600">Admin Panel</div>
+      <div class="flex gap-3">
+        <a href="../index.html" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900">View Site</a>
+        <button id="btnAdminLogout" class="px-4 py-2 text-sm font-medium text-red-600 hover:text-red-800">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-8">User Management</h1>
+
+    <!-- Filter Tabs -->
+    <div class="mb-6 flex gap-2 border-b flex-wrap">
+      <button class="tab-btn active px-4 py-2 font-medium border-b-2 border-blue-600 text-blue-600" data-filter="all">All Users</button>
+      <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="pending">Pending Verification</button>
+      <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="verified">Verified</button>
+      <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="activation">Activation Requests</button>
+      <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="featured">Featured Requests</button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Gender</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Category</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Location</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Activation</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Featured</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Subscription</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="usersTableBody" class="bg-white divide-y divide-gray-200">
+            <!-- Dynamic content -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Detail Modal -->
+  <div id="userModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] overflow-y-auto">
+      <div class="p-6 border-b">
+        <h2 class="text-2xl font-bold">User Details</h2>
+      </div>
+      <div class="p-6">
+        <div class="flex gap-6 mb-6">
+          <img id="modalUserImage" src="" alt="User" class="w-32 h-32 rounded-lg object-cover">
+          <div>
+            <h3 id="modalUsername" class="text-xl font-bold mb-2">-</h3>
+            <p class="text-gray-600"><strong>Email:</strong> <span id="modalEmail">-</span></p>
+            <p class="text-gray-600"><strong>Gender:</strong> <span id="modalGender">-</span></p>
+            <p class="text-gray-600"><strong>Category:</strong> <span id="modalCategory">-</span></p>
+            <p class="text-gray-600"><strong>Location:</strong> <span id="modalLocation">-</span></p>
+          </div>
+        </div>
+
+        <!-- Verification Actions -->
+        <div class="mb-6 border-t pt-4">
+          <h4 class="font-bold mb-2">Gender Verification</h4>
+          <div class="flex gap-2 flex-wrap">
+            <button id="btnVerifyMale" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Verify as Male</button>
+            <button id="btnVerifyFemale" class="px-4 py-2 bg-pink-600 text-white rounded-md hover:bg-pink-700">Verify as Female</button>
+            <button id="btnRejectVerification" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Reject</button>
+          </div>
+        </div>
+
+        <!-- Category & Location Management -->
+        <div class="mb-6 border-t pt-4">
+          <h4 class="font-bold mb-2">Update Category & Location</h4>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-2">Category</label>
+              <select id="modalCategorySelect" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="Girls Personal">Girls Personal</option>
+                <option value="Boys Personal">Boys Personal</option>
+                <option value="Live Cam">Live Cam</option>
+                <option value="Spa">Spa</option>
+                <option value="Verified Profiles">Verified Profiles</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-2">Location</label>
+              <select id="modalLocationSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md">
+                <option value="Colombo">Colombo</option>
+                <option value="Gampaha">Gampaha</option>
+                <option value="Kalutara">Kalutara</option>
+                <option value="Kandy">Kandy</option>
+                <option value="Matale">Matale</option>
+                <option value="Nuwara Eliya">Nuwara Eliya</option>
+                <option value="Galle">Galle</option>
+                <option value="Matara">Matara</option>
+                <option value="Hambantota">Hambantota</option>
+                <option value="Jaffna">Jaffna</option>
+                <option value="Kilinochchi">Kilinochchi</option>
+                <option value="Mannar">Mannar</option>
+                <option value="Vavuniya">Vavuniya</option>
+                <option value="Mullaitivu">Mullaitivu</option>
+                <option value="Batticaloa">Batticaloa</option>
+                <option value="Ampara">Ampara</option>
+                <option value="Trincomalee">Trincomalee</option>
+                <option value="Kurunegala">Kurunegala</option>
+                <option value="Puttalam">Puttalam</option>
+                <option value="Anuradhapura">Anuradhapura</option>
+                <option value="Polonnaruwa">Polonnaruwa</option>
+                <option value="Badulla">Badulla</option>
+                <option value="Monaragala">Monaragala</option>
+                <option value="Ratnapura">Ratnapura</option>
+                <option value="Kegalle">Kegalle</option>
+              </select>
+            </div>
+          </div>
+          <button id="btnUpdateCategoryLocation" class="mt-2 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Update Category & Location</button>
+        </div>
+
+        <!-- Activation Request -->
+        <div id="activationRequestSection" class="mb-6 border-t pt-4 hidden">
+          <h4 class="font-bold mb-2">💰 Price Activation Request</h4>
+          <div class="p-4 bg-gray-50 rounded-lg">
+            <p><strong>Payment Method:</strong> <span id="modalPaymentMethod">-</span></p>
+            <p><strong>Transaction Ref:</strong> <span id="modalTransactionRef">-</span></p>
+            <img id="modalPaymentProof" src="" alt="Payment Proof" class="mt-2 max-w-full max-h-64 rounded-lg">
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button id="btnApproveActivation" class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">Approve Activation</button>
+            <button id="btnRejectActivation" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Reject Activation</button>
+          </div>
+        </div>
+
+        <!-- Featured/Boost Request -->
+        <div id="featuredRequestSection" class="mb-6 border-t pt-4 hidden">
+          <h4 class="font-bold mb-2">⭐ Featured/Boost Request</h4>
+          <div class="p-4 bg-gray-50 rounded-lg">
+            <p><strong>Boost Plan:</strong> <span id="modalFeaturedPlan">-</span></p>
+            <p><strong>Payment Method:</strong> <span id="modalFeaturedPaymentMethod">-</span></p>
+            <p><strong>Transaction Ref:</strong> <span id="modalFeaturedTransactionRef">-</span></p>
+            <img id="modalFeaturedPaymentProof" src="" alt="Featured Payment Proof" class="mt-2 max-w-full max-h-64 rounded-lg">
+          </div>
+          <div class="flex gap-2 mt-2">
+            <button id="btnApproveFeature" class="px-4 py-2 bg-yellow-500 text-white rounded-md hover:bg-yellow-600 font-semibold">Approve Featured</button>
+            <button id="btnRejectFeature" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Reject Featured</button>
+          </div>
+        </div>
+
+        <!-- Block/Suspend -->
+        <div class="mb-6 border-t pt-4">
+          <h4 class="font-bold mb-2">Account Management</h4>
+          <button id="btnBlockUser" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">Block User</button>
+        </div>
+      </div>
+      <div class="p-6 border-t flex justify-end">
+        <button id="btnCloseModal" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../src/admin.js"></script>
+</body>
+</html>
