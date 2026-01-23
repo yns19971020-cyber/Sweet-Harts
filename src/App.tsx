@@ -4,173 +4,16 @@ import Sidebar from './components/layout/Sidebar';
 import ProfileCard from './components/features/ProfileCard';
 import FilterBar from './components/features/FilterBar';
 import LoginModal from './components/features/LoginModal';
-
-// Initialize demo admin if not exists
-const initializeDemoData = () => {
-  const users = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-  
-  if (users.length === 0) {
-    const demoAdmin = {
-      id: 'admin_1',
-      username: 'Admin',
-      email: 'admin@privateconnect.lk',
-      password: 'admin123',
-      role: 'admin',
-      createdAt: new Date().toISOString(),
-      location: 'Colombo',
-    };
-    
-    const demoUsers = [
-      {
-        id: 'user_demo1',
-        username: 'Shalini Fernando',
-        email: 'shalini@example.com',
-        password: 'demo123',
-        gender: 'Female',
-        category: 'Girls Personal',
-        location: 'Colombo',
-        role: 'user',
-        verified: true,
-        verifiedGender: 'Female',
-        canSetPrice: true,
-        priceActivationStatus: 'approved',
-        whatsappUnlockPrice: 2000, // Price to unlock WhatsApp contact
-        whatsappNumber: '+94771234567',
-        blocked: false,
-        featured: true,
-        featuredStatus: 'active',
-        featuredExpiry: new Date(Date.now() + 86400000 * 2).toISOString(),
-        featuredPlan: '3 Days',
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-        profileImage: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
-        description: 'Premium verified profile. Free chat available. Unlock WhatsApp for video calls!'
-      },
-      {
-        id: 'user_demo2',
-        username: 'Kamal Silva',
-        email: 'kamal@example.com',
-        password: 'demo123',
-        gender: 'Male',
-        category: 'Boys Personal',
-        location: 'Kandy',
-        role: 'user',
-        verified: true,
-        verifiedGender: 'Male',
-        canSetPrice: true,
-        priceActivationStatus: 'approved',
-        whatsappUnlockPrice: 1500,
-        whatsappNumber: '+94777654321',
-        blocked: false,
-        featured: false,
-        featuredStatus: 'none',
-        createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-        profileImage: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-        description: 'Verified professional. Chat free, unlock WhatsApp for premium video services.'
-      },
-      {
-        id: 'user_demo3',
-        username: 'Amaya Perera',
-        email: 'amaya@example.com',
-        password: 'demo123',
-        gender: 'Female',
-        category: 'Live Cam',
-        location: 'Galle',
-        role: 'user',
-        verified: true,
-        verifiedGender: 'Female',
-        canSetPrice: true,
-        priceActivationStatus: 'approved',
-        whatsappUnlockPrice: 2500,
-        whatsappNumber: '+94712345678',
-        blocked: false,
-        featured: true,
-        featuredStatus: 'active',
-        featuredExpiry: new Date(Date.now() + 86400000 * 6).toISOString(),
-        featuredPlan: '7 Days',
-        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-        profileImage: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400',
-        description: 'Live cam specialist. Free messaging, pay to unlock WhatsApp video calls.'
-      },
-      {
-        id: 'user_demo4',
-        username: 'Sanath Bandara',
-        email: 'sanath@example.com',
-        password: 'demo123',
-        gender: 'Male',
-        category: 'Verified Profiles',
-        location: 'Negombo',
-        role: 'user',
-        verified: true,
-        verifiedGender: 'Male',
-        canSetPrice: true,
-        priceActivationStatus: 'approved',
-        whatsappUnlockPrice: 1800,
-        whatsappNumber: '+94769876543',
-        blocked: false,
-        featured: false,
-        featuredStatus: 'none',
-        createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-        profileImage: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
-        description: 'Fully verified profile with secure communication. Unlock WhatsApp for calls.'
-      },
-      {
-        id: 'user_demo5',
-        username: 'Nisha Rajapaksa',
-        email: 'nisha@example.com',
-        password: 'demo123',
-        gender: 'Female',
-        category: 'Spa',
-        location: 'Colombo',
-        role: 'user',
-        verified: true,
-        verifiedGender: 'Female',
-        canSetPrice: true,
-        priceActivationStatus: 'approved',
-        whatsappUnlockPrice: 3000,
-        whatsappNumber: '+94751122334',
-        blocked: false,
-        featured: false,
-        featuredStatus: 'none',
-        createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-        profileImage: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-        description: 'Premium spa services. Free chat, unlock WhatsApp for video consultations.'
-      },
-      {
-        id: 'user_demo6',
-        username: 'Ravindra Kumar',
-        email: 'ravindra@example.com',
-        password: 'demo123',
-        gender: 'Male',
-        category: 'Boys Personal',
-        location: 'Jaffna',
-        role: 'user',
-        verified: false,
-        verifiedGender: null,
-        canSetPrice: false,
-        priceActivationStatus: 'none',
-        whatsappUnlockPrice: null,
-        whatsappNumber: null,
-        blocked: false,
-        featured: false,
-        featuredStatus: 'none',
-        createdAt: new Date(Date.now() - 86400000 * 0.5).toISOString(),
-        profileImage: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400',
-        description: 'Pending verification - profile will be available soon.'
-      },
-    ];
-
-    localStorage.setItem('privateconnect_users', JSON.stringify([demoAdmin, ...demoUsers]));
-  }
-};
+import { api } from './lib/api';
 
 function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
-  const [showLoginModal, setShowLoginModal] = useState(true); // Auto-show login on load
+  const [showLoginModal, setShowLoginModal] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [users, setUsers] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // Search and filter states
   const [searchQuery, setSearchQuery] = useState('');
   const [genderFilter, setGenderFilter] = useState('all');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -181,84 +24,50 @@ function App() {
   const [featuredOnly, setFeaturedOnly] = useState(false);
 
   useEffect(() => {
-    initializeDemoData();
-    ensureAdminExists(); // Ensure admin account exists
-    const storedUser = localStorage.getItem('privateconnect_currentUser');
-    if (storedUser && storedUser !== 'null') {
-      setCurrentUser(JSON.parse(storedUser));
-      setShowLoginModal(false); // Hide login if user already logged in
-    }
-    loadUsers();
+    checkAuth();
+    loadProfiles();
   }, []);
 
-  const ensureAdminExists = () => {
-    const users = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-    const adminExists = users.find((u: any) => u.email === 'jayakodyarachchigemahisha@gmail.com' && u.role === 'admin');
-    
-    if (!adminExists) {
-      const adminUser = {
-        id: 'admin_main',
-        username: 'Admin',
-        email: 'jayakodyarachchigemahisha@gmail.com',
-        password: 'admin123', // Default password (user should change it)
-        role: 'admin',
-        createdAt: new Date().toISOString(),
-      };
-      users.push(adminUser);
-      localStorage.setItem('privateconnect_users', JSON.stringify(users));
-      console.log('✅ Admin account created: jayakodyarachchigemahisha@gmail.com');
-    }
-  };
-
-  const loadUsers = () => {
-    const allUsers = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-    setUsers(allUsers.filter((u: any) => u.role !== 'admin'));
-  };
-
-  const handleLogin = () => {
-    const storedUser = localStorage.getItem('privateconnect_currentUser');
-    if (storedUser && storedUser !== 'null') {
-      setCurrentUser(JSON.parse(storedUser));
+  const checkAuth = async () => {
+    try {
+      const { user } = await api.auth.me();
+      setCurrentUser(user);
       setShowLoginModal(false);
-      loadUsers();
+    } catch (error) {
+      setCurrentUser(null);
     }
   };
 
-  const handleLogout = () => {
-    localStorage.setItem('privateconnect_currentUser', JSON.stringify(null));
-    setCurrentUser(null);
+  const loadProfiles = async () => {
+    try {
+      setLoading(true);
+      const { profiles } = await api.profiles.list();
+      setUsers(profiles || []);
+    } catch (error) {
+      console.error('Failed to load profiles:', error);
+      setUsers([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Check and expire featured status
-  useEffect(() => {
-    const checkFeaturedExpiry = () => {
-      const allUsers = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-      let updated = false;
-      
-      allUsers.forEach((user: any) => {
-        if (user.featured && user.featuredExpiry && new Date(user.featuredExpiry) < new Date()) {
-          user.featured = false;
-          user.featuredStatus = 'expired';
-          updated = true;
-        }
-      });
-      
-      if (updated) {
-        localStorage.setItem('privateconnect_users', JSON.stringify(allUsers));
-        loadUsers();
-      }
-    };
-    
-    checkFeaturedExpiry();
-    const interval = setInterval(checkFeaturedExpiry, 60000); // Check every minute
-    return () => clearInterval(interval);
-  }, []);
+  const handleLogin = async () => {
+    await checkAuth();
+    loadProfiles();
+  };
 
-  // Filter and search logic
+  const handleLogout = async () => {
+    try {
+      await api.auth.logout();
+      setCurrentUser(null);
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
+
   const getFilteredUsers = () => {
     let filtered = users.filter((u: any) => !u.blocked);
 
-    // Category filter
     if (selectedCategory !== 'all') {
       if (selectedCategory === 'Verified Profiles') {
         filtered = filtered.filter((u: any) => u.verified);
@@ -267,37 +76,31 @@ function App() {
       }
     }
 
-    // Search filter
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       filtered = filtered.filter((u: any) => 
-        u.username.toLowerCase().includes(query) ||
-        u.category.toLowerCase().includes(query) ||
+        u.username?.toLowerCase().includes(query) ||
+        u.category?.toLowerCase().includes(query) ||
         (u.description && u.description.toLowerCase().includes(query))
       );
     }
 
-    // Gender filter
     if (genderFilter !== 'all') {
       filtered = filtered.filter((u: any) => u.gender === genderFilter);
     }
 
-    // Verified only filter
     if (verifiedOnly) {
       filtered = filtered.filter((u: any) => u.verified);
     }
 
-    // Location filter
     if (locationFilter !== 'all') {
       filtered = filtered.filter((u: any) => u.location === locationFilter);
     }
 
-    // Featured only filter
     if (featuredOnly) {
       filtered = filtered.filter((u: any) => u.featured && u.featuredStatus === 'active');
     }
 
-    // Price range filter (WhatsApp unlock price)
     if (minPrice || maxPrice) {
       filtered = filtered.filter((u: any) => {
         if (!u.canSetPrice || u.priceActivationStatus !== 'approved') return false;
@@ -310,17 +113,14 @@ function App() {
       });
     }
 
-    // Sorting
-    // Featured profiles always appear first
     filtered.sort((a: any, b: any) => {
       const aFeatured = a.featured && a.featuredStatus === 'active' ? 1 : 0;
       const bFeatured = b.featured && b.featuredStatus === 'active' ? 1 : 0;
       
       if (aFeatured !== bFeatured) {
-        return bFeatured - aFeatured; // Featured first
+        return bFeatured - aFeatured;
       }
       
-      // Then apply selected sorting
       if (sortBy === 'newest') {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
@@ -376,17 +176,15 @@ function App() {
 
         <main className="flex-1 md:ml-64 min-h-screen">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Page Title */}
             <div className="mb-6">
               <h1 className="text-3xl font-bold mb-2">
                 {selectedCategory === 'all' ? 'All Profiles' : selectedCategory}
               </h1>
               <p className="text-muted-foreground">
-                💬 Free Chat & Voice | 🎥 Unlock WhatsApp for Video Calls
+                Free Chat & Voice | Unlock WhatsApp for Video Calls
               </p>
             </div>
 
-            {/* Search & Filters */}
             <FilterBar
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -406,14 +204,17 @@ function App() {
               onFeaturedChange={setFeaturedOnly}
             />
 
-            {/* Results Count */}
             <div className="mb-4 text-sm text-muted-foreground">
               Showing {filteredUsers.length} {filteredUsers.length === 1 ? 'profile' : 'profiles'}
             </div>
 
-            {/* Profile Listings */}
             <div className="space-y-4">
-              {filteredUsers.length > 0 ? (
+              {loading ? (
+                <div className="text-center py-16">
+                  <div className="text-4xl mb-4 animate-spin">⏳</div>
+                  <p className="text-muted-foreground">Loading profiles...</p>
+                </div>
+              ) : filteredUsers.length > 0 ? (
                 filteredUsers.map((user: any) => (
                   <ProfileCard key={user.id} user={user} />
                 ))
@@ -428,7 +229,6 @@ function App() {
               )}
             </div>
 
-            {/* 18+ Notice */}
             <div className="mt-8 p-4 bg-muted rounded-lg border border-border">
               <div className="text-sm text-center text-muted-foreground">
                 <strong className="text-foreground">18+ Platform Notice:</strong> Free Chat & Voice calls on this site. 

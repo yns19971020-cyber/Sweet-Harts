@@ -1,18 +1,43 @@
-// Admin Panel Handler
-const currentUser = JSON.parse(localStorage.getItem('privateconnect_currentUser'));
+const API_BASE = '';
 
-if (!currentUser || currentUser.role !== 'admin') {
-  alert('Admin access only');
-  window.location.href = '/';
+async function apiRequest(endpoint, options = {}) {
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(error.error || 'Request failed');
+  }
+
+  return response.json();
 }
 
 let users = [];
 let selectedUser = null;
 let currentFilter = 'all';
 
+checkAuth();
 loadUsers();
 
-// Tab filtering
+async function checkAuth() {
+  try {
+    const { user } = await apiRequest('/api/auth/me');
+    if (!user || user.role !== 'admin') {
+      alert('Admin access only');
+      window.location.href = '/';
+    }
+  } catch (error) {
+    alert('Please login as admin');
+    window.location.href = '/';
+  }
+}
+
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', function() {
     document.querySelectorAll('.tab-btn').forEach(b => {
@@ -27,10 +52,14 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   });
 });
 
-function loadUsers() {
-  users = JSON.parse(localStorage.getItem('privateconnect_users') || '[]')
-    .filter(u => u.role !== 'admin');
-  renderUsers();
+async function loadUsers() {
+  try {
+    const { users: allUsers } = await apiRequest('/api/admin/users');
+    users = allUsers.filter(u => u.role !== 'admin');
+    renderUsers();
+  } catch (error) {
+    console.error('Failed to load users:', error);
+  }
 }
 
 function renderUsers() {
@@ -54,7 +83,7 @@ function renderUsers() {
     tr.innerHTML = `
       <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex items-center">
-          <img src="${user.profileImage || 'https://via.placeholder.com/40'}" alt="${user.username}" class="w-10 h-10 rounded-full mr-3">
+          <img src="${user.profileImage || 'https://via.placeholder.com/40'}" alt="${user.username}" class="w-10 h-10 rounded-full mr-3 object-cover">
           <div>
             <div class="font-medium">${user.username}</div>
             <div class="text-sm text-gray-500">${user.email}</div>
@@ -82,16 +111,16 @@ function renderUsers() {
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
         ${user.featured && user.featuredStatus === 'active'
-          ? '<span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">⭐ Active</span>'
+          ? '<span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">Active</span>'
           : user.featuredStatus === 'pending'
           ? '<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">Pending</span>'
           : '<span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">None</span>'}
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
         ${user.subscriptionStatus === 'pending' 
-          ? '<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">⏳ Payment Pending</span>'
+          ? '<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">Payment Pending</span>'
           : user.subscriptionStatus === 'active'
-          ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">✓ Active</span>'
+          ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Active</span>'
           : '<span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">Expired</span>'}
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
@@ -108,91 +137,17 @@ window.openUserModal = function(userId) {
   selectedUser = users.find(u => u.id === userId);
   if (!selectedUser) return;
 
-  // Display the live selfie photo captured during registration
-  const profileImageSrc = selectedUser.profileImage || 'https://via.placeholder.com/150';
-  document.getElementById('modalUserImage').src = profileImageSrc;
-  console.log('📸 Displaying user selfie photo:', profileImageSrc.substring(0, 50) + '...');
+  document.getElementById('modalUserImage').src = selectedUser.profileImage || 'https://via.placeholder.com/150';
   document.getElementById('modalUsername').textContent = selectedUser.username;
   document.getElementById('modalEmail').textContent = selectedUser.email;
   document.getElementById('modalGender').textContent = selectedUser.gender;
   document.getElementById('modalCategory').textContent = selectedUser.category;
   document.getElementById('modalLocation').textContent = selectedUser.location || 'Not set';
   
-  console.log('User verification details:', {
-    username: selectedUser.username,
-    gender: selectedUser.gender,
-    category: selectedUser.category,
-    verified: selectedUser.verified,
-    hasSelfie: !!selectedUser.profileImage
-  });
   document.getElementById('modalCategorySelect').value = selectedUser.category;
   document.getElementById('modalLocationSelect').value = selectedUser.location || 'Colombo';
 
-  // Show subscription payment if pending
-  const existingSubDiv = document.querySelector('.subscription-approval-section');
-  if (existingSubDiv) existingSubDiv.remove();
-  
-  if (selectedUser.subscriptionStatus === 'pending') {
-    const subDiv = document.createElement('div');
-    subDiv.className = 'subscription-approval-section mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg';
-    subDiv.innerHTML = `
-      <h4 class="font-semibold mb-2">💳 Subscription Payment Approval</h4>
-      <p class="text-sm">Plan: <strong>${selectedUser.subscriptionPlan} - $${selectedUser.subscriptionPrice}</strong></p>
-      <p class="text-sm">Payment Method: ${selectedUser.subscriptionPaymentMethod}</p>
-      <p class="text-sm">Transaction Ref: ${selectedUser.subscriptionTransactionRef}</p>
-      <div class="mt-3 flex gap-2">
-        <button onclick="approveSubscription('${selectedUser.id}')" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 text-sm">✓ Approve Payment</button>
-        <button onclick="rejectSubscription('${selectedUser.id}')" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 text-sm">✗ Reject</button>
-      </div>
-    `;
-    document.getElementById('userModal').querySelector('.overflow-y-auto > div').appendChild(subDiv);
-  }
-
-  // Show activation request if pending
-  if (selectedUser.priceActivationStatus === 'pending') {
-    document.getElementById('activationRequestSection').classList.remove('hidden');
-    document.getElementById('modalPaymentMethod').textContent = selectedUser.paymentMethod || '-';
-    document.getElementById('modalTransactionRef').textContent = selectedUser.transactionRef || '-';
-    document.getElementById('modalPaymentProof').src = selectedUser.paymentProof || '';
-  } else {
-    document.getElementById('activationRequestSection').classList.add('hidden');
-  }
-
-  // Show featured request if pending
-  if (selectedUser.featuredStatus === 'pending') {
-    document.getElementById('featuredRequestSection').classList.remove('hidden');
-    document.getElementById('modalFeaturedPlan').textContent = selectedUser.featuredPlan || '-';
-    document.getElementById('modalFeaturedPaymentMethod').textContent = selectedUser.featuredPaymentMethod || '-';
-    document.getElementById('modalFeaturedTransactionRef').textContent = selectedUser.featuredTransactionRef || '-';
-    document.getElementById('modalFeaturedPaymentProof').src = selectedUser.featuredPaymentProof || '';
-  } else {
-    document.getElementById('featuredRequestSection').classList.add('hidden');
-  }
-
   document.getElementById('userModal').classList.remove('hidden');
-};
-
-// Approve subscription payment
-window.approveSubscription = function(userId) {
-  if (confirm('Approve this subscription payment?')) {
-    updateUser(userId, {
-      subscriptionStatus: 'active',
-      subscriptionStartDate: new Date().toISOString()
-    });
-    alert('Subscription approved and activated!');
-    closeModalAndRefresh();
-  }
-};
-
-// Reject subscription payment
-window.rejectSubscription = function(userId) {
-  if (confirm('Reject this subscription payment?')) {
-    updateUser(userId, {
-      subscriptionStatus: 'rejected'
-    });
-    alert('Subscription payment rejected');
-    closeModalAndRefresh();
-  }
 };
 
 document.getElementById('btnCloseModal').addEventListener('click', () => {
@@ -203,113 +158,59 @@ document.getElementById('btnVerifyMale').addEventListener('click', () => verifyU
 document.getElementById('btnVerifyFemale').addEventListener('click', () => verifyUser('Female'));
 document.getElementById('btnRejectVerification').addEventListener('click', () => rejectUser());
 
-function verifyUser(gender) {
-  updateUser(selectedUser.id, {
-    verified: true,
-    verifiedGender: gender
-  });
-  alert(`User verified as ${gender}`);
-  closeModalAndRefresh();
+async function verifyUser(gender) {
+  try {
+    await apiRequest(`/api/admin/users/${selectedUser.id}/verify`, {
+      method: 'PUT',
+      body: JSON.stringify({ verified: true, verifiedGender: gender }),
+    });
+    alert(`User verified as ${gender}`);
+    closeModalAndRefresh();
+  } catch (error) {
+    alert('Failed: ' + error.message);
+  }
 }
 
-function rejectUser() {
+async function rejectUser() {
   if (confirm('Reject this user verification?')) {
-    updateUser(selectedUser.id, {
-      verified: false,
-      verifiedGender: null
-    });
-    alert('User verification rejected');
-    closeModalAndRefresh();
+    try {
+      await apiRequest(`/api/admin/users/${selectedUser.id}/verify`, {
+        method: 'PUT',
+        body: JSON.stringify({ verified: false, verifiedGender: null }),
+      });
+      alert('User verification rejected');
+      closeModalAndRefresh();
+    } catch (error) {
+      alert('Failed: ' + error.message);
+    }
   }
 }
 
-document.getElementById('btnUpdateCategoryLocation').addEventListener('click', () => {
-  const newCategory = document.getElementById('modalCategorySelect').value;
-  const newLocation = document.getElementById('modalLocationSelect').value;
-  updateUser(selectedUser.id, { 
-    category: newCategory,
-    location: newLocation
-  });
-  alert('Category and location updated');
-  closeModalAndRefresh();
-});
-
-document.getElementById('btnApproveActivation').addEventListener('click', () => {
-  updateUser(selectedUser.id, {
-    priceActivationStatus: 'approved',
-    canSetPrice: true
-  });
-  alert('Price activation approved!');
-  closeModalAndRefresh();
-});
-
-document.getElementById('btnRejectActivation').addEventListener('click', () => {
-  if (confirm('Reject activation request?')) {
-    updateUser(selectedUser.id, {
-      priceActivationStatus: 'rejected',
-      canSetPrice: false
-    });
-    alert('Activation request rejected');
-    closeModalAndRefresh();
+document.getElementById('btnBlockUser').addEventListener('click', async () => {
+  if (confirm('Block this user?')) {
+    try {
+      await apiRequest(`/api/admin/users/${selectedUser.id}/block`, {
+        method: 'PUT',
+        body: JSON.stringify({ blocked: true }),
+      });
+      alert('User blocked');
+      closeModalAndRefresh();
+    } catch (error) {
+      alert('Failed: ' + error.message);
+    }
   }
 });
 
-document.getElementById('btnApproveFeature').addEventListener('click', () => {
-  // Calculate expiry based on plan
-  let expiryDate = new Date();
-  const plan = selectedUser.featuredPlan;
-  
-  if (plan === '24 Hours') {
-    expiryDate.setHours(expiryDate.getHours() + 24);
-  } else if (plan === '3 Days') {
-    expiryDate.setDate(expiryDate.getDate() + 3);
-  } else if (plan === '7 Days') {
-    expiryDate.setDate(expiryDate.getDate() + 7);
-  }
-
-  updateUser(selectedUser.id, {
-    featured: true,
-    featuredStatus: 'active',
-    featuredExpiry: expiryDate.toISOString()
-  });
-  alert(`Featured status approved! Will expire on ${expiryDate.toLocaleString()}`);
-  closeModalAndRefresh();
-});
-
-document.getElementById('btnRejectFeature').addEventListener('click', () => {
-  if (confirm('Reject featured request?')) {
-    updateUser(selectedUser.id, {
-      featured: false,
-      featuredStatus: 'rejected'
-    });
-    alert('Featured request rejected');
-    closeModalAndRefresh();
-  }
-});
-
-document.getElementById('btnBlockUser').addEventListener('click', () => {
-  if (confirm('Block this user? They will not be able to login.')) {
-    updateUser(selectedUser.id, { blocked: true });
-    alert('User blocked');
-    closeModalAndRefresh();
-  }
-});
-
-function updateUser(userId, updates) {
-  const allUsers = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-  const index = allUsers.findIndex(u => u.id === userId);
-  if (index !== -1) {
-    allUsers[index] = { ...allUsers[index], ...updates };
-    localStorage.setItem('privateconnect_users', JSON.stringify(allUsers));
-  }
-}
-
-function closeModalAndRefresh() {
+async function closeModalAndRefresh() {
   document.getElementById('userModal').classList.add('hidden');
-  loadUsers();
+  await loadUsers();
 }
 
-document.getElementById('btnAdminLogout').addEventListener('click', () => {
-  localStorage.setItem('privateconnect_currentUser', JSON.stringify(null));
-  window.location.href = '/';
+document.getElementById('btnAdminLogout').addEventListener('click', async () => {
+  try {
+    await apiRequest('/api/auth/logout', { method: 'POST' });
+    window.location.href = '/';
+  } catch (error) {
+    window.location.href = '/';
+  }
 });

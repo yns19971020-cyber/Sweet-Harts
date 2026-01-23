@@ -1,10 +1,11 @@
-modules = ["nodejs-20"]
+modules = ["nodejs-20", "python-3.11"]
 [nix]
 channel = "stable-25_05"
 packages = ["unzip"]
 
 [agent]
 expertMode = true
+integrations = ["stripe:2.0.0"]
 
 [workflows]
 runButton = "Project"
@@ -22,13 +23,13 @@ args = "PrivateConnect Dev Server"
 name = "PrivateConnect Dev Server"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "webview"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "npm run dev"
 waitForPort = 5000
-
-[workflows.workflow.metadata]
-outputType = "webview"
 
 [[ports]]
 localPort = 5000

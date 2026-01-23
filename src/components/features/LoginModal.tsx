@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { X } from 'lucide-react';
+import { api } from '../../lib/api';
 
 interface LoginModalProps {
   onClose: () => void;
@@ -8,10 +9,11 @@ interface LoginModalProps {
 
 export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const emailRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const email = emailRef.current?.value;
     const password = passwordRef.current?.value;
 
@@ -20,54 +22,24 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
       return;
     }
 
-    // Special admin access for jayakodyarachchigemahisha@gmail.com
-    if (email === 'jayakodyarachchigemahisha@gmail.com') {
-      const users = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-      const adminUser = users.find((u: any) => u.email === email && u.role === 'admin');
+    setLoading(true);
+    setError('');
+
+    try {
+      const { user } = await api.auth.login(email, password);
       
-      if (!adminUser) {
-        // Create admin user if not exists
-        const newAdmin = {
-          id: 'admin_main',
-          username: 'Admin',
-          email: 'jayakodyarachchigemahisha@gmail.com',
-          password: password,
-          role: 'admin',
-          createdAt: new Date().toISOString(),
-        };
-        users.push(newAdmin);
-        localStorage.setItem('privateconnect_users', JSON.stringify(users));
-        localStorage.setItem('privateconnect_currentUser', JSON.stringify(newAdmin));
+      if (user.role === 'admin') {
         window.location.href = '/admin.html';
         return;
       }
-      
-      if (adminUser.password !== password) {
-        setError('Invalid admin password');
-        return;
-      }
-      
-      localStorage.setItem('privateconnect_currentUser', JSON.stringify(adminUser));
-      window.location.href = '/admin.html';
-      return;
+
+      onLogin();
+      onClose();
+    } catch (err: any) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
-
-    const users = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
-    const user = users.find((u: any) => u.email === email && u.password === password && u.role !== 'admin');
-
-    if (!user) {
-      setError('Invalid credentials');
-      return;
-    }
-
-    if (user.blocked) {
-      setError('Your account has been blocked');
-      return;
-    }
-
-    localStorage.setItem('privateconnect_currentUser', JSON.stringify(user));
-    onLogin();
-    onClose();
   };
 
   return (
@@ -109,8 +81,12 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
             />
           </div>
 
-          <button onClick={handleLogin} className="w-full btn-primary">
-            Login / පිවිසෙන්න
+          <button 
+            onClick={handleLogin} 
+            className="w-full btn-primary"
+            disabled={loading}
+          >
+            {loading ? 'Loading...' : 'Login / පිවිසෙන්න'}
           </button>
 
           <div className="text-center text-sm">
@@ -122,7 +98,7 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
 
           <div className="pt-4 border-t border-border">
             <div className="text-xs text-muted-foreground text-center">
-              <strong>🔐 Admin Access:</strong><br/>
+              <strong>Admin Access:</strong><br/>
               Only jayakodyarachchigemahisha@gmail.com
             </div>
           </div>
