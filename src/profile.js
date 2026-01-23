@@ -4,7 +4,7 @@ const userId = urlParams.get('id');
 
 if (!userId) {
   alert('Invalid profile');
-  window.location.href = '../index.html';
+  window.location.href = '/';
 }
 
 const users = JSON.parse(localStorage.getItem('privateconnect_users') || '[]');
@@ -12,7 +12,7 @@ const user = users.find(u => u.id === userId);
 
 if (!user || user.role === 'admin') {
   alert('Profile not found');
-  window.location.href = '../index.html';
+  window.location.href = '/';
 }
 
 const currentUser = JSON.parse(localStorage.getItem('privateconnect_currentUser'));
@@ -117,7 +117,7 @@ if (!user.verified || !user.canSetPrice) {
   document.getElementById('btnFreeChat').addEventListener('click', function() {
     if (!currentUser) {
       alert('කරුණාකර පළමුව login වන්න. (Please login first.)');
-      window.location.href = '../index.html';
+      window.location.href = '/';
       return;
     }
     alert(`💬 Free Chat සමඟ ${user.username}\n\nChat feature එක එළඹෙන යාවත්කාලීනයෙන් available වේ! දැනට WhatsApp unlock කර භාවිතා කරන්න.`);
@@ -127,7 +127,7 @@ if (!user.verified || !user.canSetPrice) {
   document.getElementById('btnFreeVoice').addEventListener('click', function() {
     if (!currentUser) {
       alert('කරුණාකර පළමුව login වන්න. (Please login first.)');
-      window.location.href = '../index.html';
+      window.location.href = '/';
       return;
     }
     alert(`📞 Free Voice Call සමඟ ${user.username}\n\nVoice call feature එක එළඹෙන යාවත්කාලීනයෙන් available වේ! දැනට WhatsApp unlock කර භාවිතා කරන්න.`);
@@ -139,7 +139,7 @@ if (!user.verified || !user.canSetPrice) {
     btnUnlock.addEventListener('click', function() {
       if (!currentUser) {
         alert('කරුණාකර පළමුව login වන්න. (Please login first.)');
-        window.location.href = '../index.html';
+        window.location.href = '/';
         return;
       }
 

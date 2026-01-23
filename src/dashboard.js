@@ -3,7 +3,7 @@ const currentUser = JSON.parse(localStorage.getItem('privateconnect_currentUser'
 
 if (!currentUser || currentUser.role === 'admin') {
   alert('Please login as a user');
-  window.location.href = '../index.html';
+  window.location.href = '/';
 }
 
 // Display wallet balance
@@ -248,5 +248,5 @@ document.getElementById('btnSubmitBoost').addEventListener('click', function() {
 // Logout
 document.getElementById('btnLogout').addEventListener('click', function() {
   localStorage.setItem('privateconnect_currentUser', JSON.stringify(null));
-  window.location.href = '../index.html';
+  window.location.href = '/';
 });

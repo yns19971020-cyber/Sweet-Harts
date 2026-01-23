@@ -3,7 +3,7 @@ const currentUser = JSON.parse(localStorage.getItem('privateconnect_currentUser'
 
 if (!currentUser || currentUser.role !== 'admin') {
   alert('Admin access only');
-  window.location.href = '../index.html';
+  window.location.href = '/';
 }
 
 let users = [];
@@ -311,5 +311,5 @@ function closeModalAndRefresh() {
 
 document.getElementById('btnAdminLogout').addEventListener('click', () => {
   localStorage.setItem('privateconnect_currentUser', JSON.stringify(null));
-  window.location.href = '../index.html';
+  window.location.href = '/';
 });

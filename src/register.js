@@ -546,6 +546,6 @@ document.getElementById('registerForm').addEventListener('submit', function(e) {
     localStorage.setItem('privateconnect_users', JSON.stringify(users));
 
     alert('ලියාපදිංචිය සාර්ථකයි! ඔබගේ ගිණුම admin සත්‍යාපනය සඳහා පොරොත්තු වේ.\n\nRegistration successful! Your account and subscription payment are pending admin approval.');
-    window.location.href = '../index.html';
+    window.location.href = '/';
   }
 });
