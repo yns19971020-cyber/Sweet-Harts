@@ -2,7 +2,6 @@ import express, { type Express, type Request, type Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { storage } from './storage';
-import { getUncachableStripeClient, getStripePublishableKey } from './stripeClient';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'privateconnect-secret-key-2024';
 
@@ -216,95 +215,6 @@ export function registerRoutes(app: Express) {
     }
   });
 
-  app.post('/api/stripe/checkout', authMiddleware, async (req: AuthRequest, res) => {
-    try {
-      const { priceId, profileId, type } = req.body;
-      const stripe = await getUncachableStripeClient();
-      const user = await storage.getUserById(req.user.id);
-
-      if (!user) {
-        return res.status(404).json({ error: 'User not found' });
-      }
-
-      let customerId = user.stripeCustomerId;
-      if (!customerId) {
-        const customer = await stripe.customers.create({
-          email: user.email,
-          metadata: { userId: user.id },
-        });
-        customerId = customer.id;
-        await storage.updateUser(user.id, { stripeCustomerId: customerId });
-      }
-
-      const baseUrl = `https://${process.env.REPLIT_DOMAINS?.split(',')[0]}`;
-
-      if (type === 'whatsapp_unlock' && profileId) {
-        const targetProfile = await storage.getUserById(profileId);
-        if (!targetProfile) {
-          return res.status(404).json({ error: 'Profile not found' });
-        }
-
-        const session = await stripe.checkout.sessions.create({
-          customer: customerId,
-          payment_method_types: ['card'],
-          line_items: [{
-            price_data: {
-              currency: 'lkr',
-              product_data: {
-                name: `WhatsApp Unlock - ${targetProfile.username}`,
-                description: 'Unlock WhatsApp contact for video calls',
-              },
-              unit_amount: (targetProfile.whatsappUnlockPrice || 500) * 100,
-            },
-            quantity: 1,
-          }],
-          mode: 'payment',
-          success_url: `${baseUrl}/profile.html?id=${profileId}&unlocked=true`,
-          cancel_url: `${baseUrl}/profile.html?id=${profileId}`,
-          metadata: {
-            type: 'whatsapp_unlock',
-            buyerId: user.id,
-            sellerId: profileId,
-            amount: targetProfile.whatsappUnlockPrice?.toString() || '500',
-          },
-        });
-
-        return res.json({ url: session.url });
-      }
-
-      if (type === 'subscription' && priceId) {
-        const session = await stripe.checkout.sessions.create({
-          customer: customerId,
-          payment_method_types: ['card'],
-          line_items: [{ price: priceId, quantity: 1 }],
-          mode: 'subscription',
-          success_url: `${baseUrl}/dashboard.html?subscription=success`,
-          cancel_url: `${baseUrl}/dashboard.html?subscription=cancel`,
-          metadata: {
-            type: 'subscription',
-            userId: user.id,
-          },
-        });
-
-        return res.json({ url: session.url });
-      }
-
-      res.status(400).json({ error: 'Invalid checkout type' });
-    } catch (error: any) {
-      console.error('Checkout error:', error);
-      res.status(500).json({ error: error.message });
-    }
-  });
-
-  app.get('/api/stripe/publishable-key', async (req, res) => {
-    try {
-      const key = await getStripePublishableKey();
-      res.json({ publishableKey: key });
-    } catch (error: any) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-
   app.post('/api/user/price-activation', authMiddleware, async (req: AuthRequest, res) => {
     try {
       const { paymentMethod, transactionRef, paymentProof } = req.body;
@@ -435,6 +345,113 @@ export function registerRoutes(app: Express) {
       else if (plan === '7 Days') expiryDate.setDate(expiryDate.getDate() + 7);
       
       await storage.approveFeaturedRequest(req.params.id, userId, expiryDate);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/bank-details', (req, res) => {
+    res.json({
+      bankName: 'Sampath Bank',
+      accountNumber: '105057458082',
+      accountName: 'J A Y S Kavinda',
+      branch: 'Kadawatha'
+    });
+  });
+
+  app.post('/api/messages', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { message, attachment, messageType } = req.body;
+      
+      if (!message || message.length > 1000) {
+        return res.status(400).json({ error: 'Message must be between 1 and 1000 characters' });
+      }
+      
+      if (attachment) {
+        const maxSize = 2 * 1024 * 1024;
+        if (attachment.length > maxSize) {
+          return res.status(400).json({ error: 'Attachment too large. Maximum 2MB allowed.' });
+        }
+        
+        if (!attachment.startsWith('data:image/')) {
+          return res.status(400).json({ error: 'Only image attachments are allowed' });
+        }
+      }
+      
+      const admin = await storage.getAdminUser();
+      
+      if (!admin) {
+        return res.status(500).json({ error: 'Admin not found' });
+      }
+
+      const msg = await storage.sendMessage({
+        senderId: req.user.id,
+        receiverId: admin.id,
+        message,
+        messageType: messageType || 'text',
+        attachment,
+      });
+
+      res.json({ message: msg });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/messages', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const admin = await storage.getAdminUser();
+      if (!admin) {
+        return res.status(500).json({ error: 'Admin not found' });
+      }
+
+      const messages = await storage.getConversation(req.user.id, admin.id);
+      res.json({ messages });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/messages/unread', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const count = await storage.getUnreadCount(req.user.id);
+      res.json({ unreadCount: count });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/admin/messages', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const messages = await storage.getMessages(req.user.id);
+      res.json({ messages });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/admin/messages/:userId', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { message, attachment, messageType } = req.body;
+      
+      const msg = await storage.sendMessage({
+        senderId: req.user.id,
+        receiverId: req.params.userId,
+        message,
+        messageType: messageType || 'text',
+        attachment,
+      });
+
+      res.json({ message: msg });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.put('/api/messages/read/:senderId', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      await storage.markMessagesAsRead(req.user.id, req.params.senderId);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

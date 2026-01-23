@@ -1,7 +1,7 @@
-import { users, walletTransactions, whatsappUnlocks, subscriptionPayments, featuredRequests, priceActivationRequests } from './schema';
+import { users, walletTransactions, whatsappUnlocks, subscriptionPayments, featuredRequests, priceActivationRequests, messages } from './schema';
 import { eq, sql, desc, and, or, ilike } from 'drizzle-orm';
 import { db } from './db';
-import type { User, InsertUser } from './schema';
+import type { User, InsertUser, Message } from './schema';
 
 export class Storage {
   async getProduct(productId: string) {
@@ -214,6 +214,44 @@ export class Storage {
 
   async deleteUser(id: string) {
     await db.delete(users).where(eq(users.id, id));
+  }
+
+  async sendMessage(data: { senderId: string; receiverId: string; message: string; messageType?: string; attachment?: string }) {
+    const [msg] = await db.insert(messages).values(data).returning();
+    return msg;
+  }
+
+  async getMessages(userId: string) {
+    return await db.select().from(messages)
+      .where(or(eq(messages.senderId, userId), eq(messages.receiverId, userId)))
+      .orderBy(desc(messages.createdAt));
+  }
+
+  async getConversation(userId1: string, userId2: string) {
+    return await db.select().from(messages)
+      .where(or(
+        and(eq(messages.senderId, userId1), eq(messages.receiverId, userId2)),
+        and(eq(messages.senderId, userId2), eq(messages.receiverId, userId1))
+      ))
+      .orderBy(messages.createdAt);
+  }
+
+  async markMessagesAsRead(receiverId: string, senderId: string) {
+    await db.update(messages)
+      .set({ isRead: true })
+      .where(and(eq(messages.receiverId, receiverId), eq(messages.senderId, senderId)));
+  }
+
+  async getUnreadCount(userId: string) {
+    const result = await db.execute(
+      sql`SELECT COUNT(*) as count FROM messages WHERE receiver_id = ${userId} AND is_read = false`
+    );
+    return parseInt(result.rows[0]?.count as string || '0');
+  }
+
+  async getAdminUser(): Promise<User | null> {
+    const [admin] = await db.select().from(users).where(eq(users.role, 'admin'));
+    return admin || null;
   }
 }
 

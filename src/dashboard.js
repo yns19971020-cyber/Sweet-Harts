@@ -207,3 +207,116 @@ document.getElementById('btnLogout').addEventListener('click', async function() 
     window.location.href = '/';
   }
 });
+
+let receiptData = '';
+
+document.getElementById('btnContactAdmin').addEventListener('click', function() {
+  document.getElementById('messageModal').classList.remove('hidden');
+  loadMessages();
+  loadUnreadCount();
+});
+
+document.getElementById('btnCloseMessageModal').addEventListener('click', function() {
+  document.getElementById('messageModal').classList.add('hidden');
+});
+
+document.getElementById('receiptUpload').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      receiptData = event.target.result;
+      document.getElementById('receiptImage').src = receiptData;
+      document.getElementById('receiptPreview').classList.remove('hidden');
+    };
+    reader.readAsDataURL(file);
+  }
+});
+
+document.getElementById('btnRemoveReceipt').addEventListener('click', function() {
+  receiptData = '';
+  document.getElementById('receiptUpload').value = '';
+  document.getElementById('receiptPreview').classList.add('hidden');
+});
+
+document.getElementById('btnSendMessage').addEventListener('click', async function() {
+  const messageInput = document.getElementById('messageInput');
+  const message = messageInput.value.trim();
+  
+  if (!message && !receiptData) {
+    alert('Please enter a message or attach a receipt');
+    return;
+  }
+  
+  try {
+    await apiRequest('/api/messages', {
+      method: 'POST',
+      body: JSON.stringify({
+        message: message || 'Payment Receipt Attached',
+        messageType: receiptData ? 'receipt' : 'text',
+        attachment: receiptData || null,
+      }),
+    });
+    
+    messageInput.value = '';
+    receiptData = '';
+    document.getElementById('receiptUpload').value = '';
+    document.getElementById('receiptPreview').classList.add('hidden');
+    
+    loadMessages();
+    alert('පණිවිඩය සාර්ථකව එවන ලදී! (Message sent successfully!)');
+  } catch (error) {
+    alert('Failed to send message: ' + error.message);
+  }
+});
+
+async function loadMessages() {
+  try {
+    const { messages } = await apiRequest('/api/messages');
+    const messagesList = document.getElementById('messagesList');
+    
+    if (!messages || messages.length === 0) {
+      messagesList.innerHTML = '<p class="text-center text-gray-500 text-sm">No messages yet. Start a conversation!</p>';
+      return;
+    }
+    
+    messagesList.innerHTML = messages.map(msg => {
+      const isFromMe = msg.senderId === currentUser.id;
+      const time = new Date(msg.createdAt).toLocaleString('en-US', { 
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+      });
+      
+      return `
+        <div class="flex ${isFromMe ? 'justify-end' : 'justify-start'}">
+          <div class="max-w-[80%] ${isFromMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg p-3">
+            <p class="text-sm">${msg.message}</p>
+            ${msg.attachment ? `<img src="${msg.attachment}" class="mt-2 max-h-40 rounded">` : ''}
+            <p class="text-xs ${isFromMe ? 'text-blue-100' : 'text-gray-500'} mt-1">${time}</p>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    messagesList.scrollTop = messagesList.scrollHeight;
+  } catch (error) {
+    console.error('Failed to load messages:', error);
+  }
+}
+
+async function loadUnreadCount() {
+  try {
+    const { unreadCount } = await apiRequest('/api/messages/unread');
+    const badge = document.getElementById('unreadBadge');
+    
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
+    }
+  } catch (error) {
+    console.error('Failed to load unread count:', error);
+  }
+}
+
+loadUnreadCount();

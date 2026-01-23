@@ -116,6 +116,19 @@ async function initDatabase() {
     )
   `);
 
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS messages (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      sender_id UUID REFERENCES users(id) NOT NULL,
+      receiver_id UUID REFERENCES users(id) NOT NULL,
+      message TEXT NOT NULL,
+      message_type TEXT DEFAULT 'text',
+      attachment TEXT,
+      is_read BOOLEAN DEFAULT FALSE,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+
   const adminEmail = 'jayakodyarachchigemahisha@gmail.com';
   const existingAdmin = await db.execute(sql`SELECT * FROM users WHERE email = ${adminEmail}`);
   

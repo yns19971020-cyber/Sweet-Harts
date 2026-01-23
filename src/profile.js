@@ -161,21 +161,14 @@ function displayProfile() {
         return;
       }
 
-      try {
-        const { url } = await apiRequest('/api/stripe/checkout', {
-          method: 'POST',
-          body: JSON.stringify({
-            type: 'whatsapp_unlock',
-            profileId: profileUser.id,
-          }),
-        });
-        
-        if (url) {
-          window.location.href = url;
-        }
-      } catch (error) {
-        alert('Payment failed: ' + error.message);
-      }
+      alert(`WhatsApp Unlock කිරීමට:\n\n` +
+        `1. බැංකු ගිණුමට Rs.${profileUser.whatsappUnlockPrice} මුදල් යොමු කරන්න:\n` +
+        `   Sampath Bank - 105057458082\n` +
+        `   J A Y S Kavinda (Kadawatha)\n\n` +
+        `2. ඔබගේ Dashboard එකේ "Admin වෙත පණිවිඩය" බොත්තම ඔබා රිසිට් එක එවන්න.\n\n` +
+        `3. Admin විසින් සත්‍යාපනය කළ පසු WhatsApp අංකය unlock වේ.`);
+      
+      window.location.href = '/dashboard.html';
     });
   }
 }

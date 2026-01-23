@@ -48,7 +48,19 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     this.classList.remove('text-gray-600');
     
     currentFilter = this.dataset.filter;
-    renderUsers();
+    
+    const messagesSection = document.getElementById('messagesSection');
+    const usersTable = document.querySelector('.bg-white.rounded-lg.shadow-lg.overflow-hidden');
+    
+    if (currentFilter === 'messages') {
+      messagesSection.classList.remove('hidden');
+      usersTable.classList.add('hidden');
+      loadMessages();
+    } else {
+      messagesSection.classList.add('hidden');
+      usersTable.classList.remove('hidden');
+      renderUsers();
+    }
   });
 });
 
@@ -214,3 +226,95 @@ document.getElementById('btnAdminLogout').addEventListener('click', async () => 
     window.location.href = '/';
   }
 });
+
+let adminId = null;
+
+async function loadMessages() {
+  try {
+    const { user } = await apiRequest('/api/auth/me');
+    adminId = user.id;
+    
+    const { messages } = await apiRequest('/api/admin/messages');
+    const messagesList = document.getElementById('messagesList');
+    
+    if (!messages || messages.length === 0) {
+      messagesList.innerHTML = '<p class="text-gray-500 text-center py-4">No messages yet</p>';
+      return;
+    }
+
+    const groupedMessages = {};
+    messages.forEach(msg => {
+      const otherUserId = msg.senderId === adminId ? msg.receiverId : msg.senderId;
+      if (!groupedMessages[otherUserId]) {
+        groupedMessages[otherUserId] = [];
+      }
+      groupedMessages[otherUserId].push(msg);
+    });
+
+    let html = '';
+    for (const [userId, msgs] of Object.entries(groupedMessages)) {
+      const user = users.find(u => u.id === userId);
+      const userName = user ? user.username : 'Unknown User';
+      const unreadCount = msgs.filter(m => !m.isRead && m.senderId === userId).length;
+      
+      html += `
+        <div class="border rounded-lg p-4 bg-gray-50">
+          <div class="flex justify-between items-center mb-3">
+            <div class="flex items-center gap-3">
+              <img src="${user?.profileImage || 'https://via.placeholder.com/40'}" alt="${userName}" class="w-10 h-10 rounded-full object-cover">
+              <div>
+                <h3 class="font-semibold">${userName}</h3>
+                <p class="text-xs text-gray-500">${msgs.length} messages</p>
+              </div>
+            </div>
+            ${unreadCount > 0 ? `<span class="bg-red-500 text-white text-xs rounded-full px-2 py-1">${unreadCount} new</span>` : ''}
+          </div>
+          <div class="space-y-2 max-h-60 overflow-y-auto">
+            ${msgs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(msg => {
+              const isFromUser = msg.senderId !== adminId;
+              return `
+              <div class="p-2 rounded ${isFromUser ? 'bg-blue-100' : 'bg-green-100 ml-8'} text-sm">
+                <p class="text-xs font-semibold ${isFromUser ? 'text-blue-700' : 'text-green-700'}">${isFromUser ? 'User' : 'Admin (You)'}</p>
+                <p>${msg.message}</p>
+                ${msg.attachment ? `<img src="${msg.attachment}" class="mt-2 max-h-40 rounded border cursor-pointer" onclick="window.open('${msg.attachment}', '_blank')">` : ''}
+                <p class="text-xs text-gray-500 mt-1">${new Date(msg.createdAt).toLocaleString()}</p>
+              </div>
+            `}).join('')}
+          </div>
+          <div class="mt-3 flex gap-2">
+            <input type="text" id="reply-${userId}" placeholder="Reply to user..." class="flex-1 px-3 py-2 border rounded-md text-sm">
+            <button onclick="sendReply('${userId}')" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">Send</button>
+          </div>
+        </div>
+      `;
+    }
+    
+    messagesList.innerHTML = html;
+  } catch (error) {
+    console.error('Failed to load messages:', error);
+    document.getElementById('messagesList').innerHTML = '<p class="text-red-500 text-center py-4">Failed to load messages</p>';
+  }
+}
+
+window.sendReply = async function(userId) {
+  const input = document.getElementById(`reply-${userId}`);
+  const message = input.value.trim();
+  
+  if (!message) {
+    alert('Please enter a message');
+    return;
+  }
+  
+  try {
+    await apiRequest(`/api/admin/messages/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ message }),
+    });
+    
+    input.value = '';
+    loadMessages();
+    alert('Reply sent!');
+  } catch (error) {
+    alert('Failed to send reply: ' + error.message);
+  }
+};

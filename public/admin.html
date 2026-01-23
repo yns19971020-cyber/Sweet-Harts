@@ -28,6 +28,20 @@
       <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="verified">Verified</button>
       <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="activation">Activation Requests</button>
       <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="featured">Featured Requests</button>
+      <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="messages">
+        Messages
+        <span id="msgBadge" class="hidden ml-1 bg-red-500 text-white text-xs rounded-full px-2">0</span>
+      </button>
+    </div>
+
+    <!-- Messages Section (hidden by default) -->
+    <div id="messagesSection" class="hidden mb-8">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-4">User Messages & Payment Receipts</h2>
+        <div id="messagesList" class="space-y-4">
+          <p class="text-gray-500 text-center py-4">Loading messages...</p>
+        </div>
+      </div>
     </div>
 
     <!-- Users Table -->

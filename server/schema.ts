@@ -87,5 +87,17 @@ export const priceActivationRequests = pgTable('price_activation_requests', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const messages = pgTable('messages', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  senderId: uuid('sender_id').references(() => users.id).notNull(),
+  receiverId: uuid('receiver_id').references(() => users.id).notNull(),
+  message: text('message').notNull(),
+  messageType: text('message_type').default('text'),
+  attachment: text('attachment'),
+  isRead: boolean('is_read').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
+export type Message = typeof messages.$inferSelect;

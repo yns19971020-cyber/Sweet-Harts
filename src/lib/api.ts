@@ -46,10 +46,16 @@ export const api = {
     requestFeatured: (data: any) => request('/api/user/featured-request', { method: 'POST', body: JSON.stringify(data) }),
   },
 
-  stripe: {
-    checkout: (data: { priceId?: string; profileId?: string; type: string }) => 
-      request('/api/stripe/checkout', { method: 'POST', body: JSON.stringify(data) }),
-    getPublishableKey: () => request('/api/stripe/publishable-key'),
+  bankDetails: {
+    get: () => request('/api/bank-details'),
+  },
+
+  messages: {
+    send: (data: { message: string; attachment?: string; messageType?: string }) =>
+      request('/api/messages', { method: 'POST', body: JSON.stringify(data) }),
+    list: () => request('/api/messages'),
+    unread: () => request('/api/messages/unread'),
+    markRead: (senderId: string) => request(`/api/messages/read/${senderId}`, { method: 'PUT' }),
   },
 
   admin: {
