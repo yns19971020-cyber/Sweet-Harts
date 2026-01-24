@@ -105,19 +105,19 @@ function renderUsers() {
     tr.innerHTML = `
       <td class="px-6 py-4 whitespace-nowrap">
         <div class="flex items-center">
-          <img src="${user.profileImage || 'https://via.placeholder.com/40'}" alt="${user.username}" class="w-10 h-10 rounded-full mr-3 object-cover">
+          <img src="${escapeHtml(user.profileImage) || 'https://via.placeholder.com/40'}" alt="${escapeHtml(user.username)}" class="w-10 h-10 rounded-full mr-3 object-cover">
           <div>
-            <div class="font-medium">${user.username}</div>
-            <div class="text-sm text-gray-500">${user.email}</div>
+            <div class="font-medium">${escapeHtml(user.username)}</div>
+            <div class="text-sm text-gray-500">${escapeHtml(user.email)}</div>
           </div>
         </div>
       </td>
-      <td class="px-6 py-4 whitespace-nowrap">${user.gender}</td>
+      <td class="px-6 py-4 whitespace-nowrap">${escapeHtml(user.gender)}</td>
       <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">${user.category}</span>
+        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">${escapeHtml(user.category)}</span>
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
-        <span class="text-sm">${user.location || 'Not set'}</span>
+        <span class="text-sm">${escapeHtml(user.location) || 'Not set'}</span>
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
         ${user.verified 
@@ -146,7 +146,7 @@ function renderUsers() {
           : '<span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">Expired</span>'}
       </td>
       <td class="px-6 py-4 whitespace-nowrap">
-        <button onclick="openUserModal('${user.id}')" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
+        <button onclick="openUserModal('${escapeHtml(user.id)}')" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
           Manage
         </button>
       </td>
@@ -267,13 +267,15 @@ async function loadMessages() {
       const userName = user ? user.username : 'Unknown User';
       const unreadCount = msgs.filter(m => !m.isRead && m.senderId === userId).length;
       
+      const safeProfileImage = user?.profileImage && !user.profileImage.toLowerCase().startsWith('javascript:') ? escapeHtml(user.profileImage) : 'https://via.placeholder.com/40';
+      const safeUserName = escapeHtml(userName);
       html += `
         <div class="border rounded-lg p-4 bg-gray-50">
           <div class="flex justify-between items-center mb-3">
             <div class="flex items-center gap-3">
-              <img src="${user?.profileImage || 'https://via.placeholder.com/40'}" alt="${userName}" class="w-10 h-10 rounded-full object-cover">
+              <img src="${safeProfileImage}" alt="${safeUserName}" class="w-10 h-10 rounded-full object-cover">
               <div>
-                <h3 class="font-semibold">${userName}</h3>
+                <h3 class="font-semibold">${safeUserName}</h3>
                 <p class="text-xs text-gray-500">${msgs.length} messages</p>
               </div>
             </div>
@@ -282,11 +284,12 @@ async function loadMessages() {
           <div class="space-y-2 max-h-60 overflow-y-auto">
             ${msgs.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt)).map(msg => {
               const isFromUser = msg.senderId !== adminId;
+              const safeAttachment = msg.attachment && !msg.attachment.toLowerCase().startsWith('javascript:') ? escapeHtml(msg.attachment) : '';
               return `
               <div class="p-2 rounded ${isFromUser ? 'bg-blue-100' : 'bg-green-100 ml-8'} text-sm">
                 <p class="text-xs font-semibold ${isFromUser ? 'text-blue-700' : 'text-green-700'}">${isFromUser ? 'User' : 'Admin (You)'}</p>
-                <p>${msg.message}</p>
-                ${msg.attachment ? `<img src="${msg.attachment}" class="mt-2 max-h-40 rounded border cursor-pointer" onclick="window.open('${msg.attachment}', '_blank')">` : ''}
+                <p>${escapeHtml(msg.message)}</p>
+                ${safeAttachment ? `<img src="${safeAttachment}" class="mt-2 max-h-40 rounded border cursor-pointer" onclick="window.open('${safeAttachment}', '_blank')">` : ''}
                 <p class="text-xs text-gray-500 mt-1">${new Date(msg.createdAt).toLocaleString()}</p>
               </div>
             `}).join('')}
