@@ -124,17 +124,25 @@ function displayProfile() {
     lockMessage.classList.add('hidden');
     
     const buttonContainer = document.querySelector('.grid.grid-cols-1.md\\:grid-cols-3.gap-4');
-    buttonContainer.innerHTML = `
-      <button id="btnFreeChat" class="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700">
-        Free Chat
-      </button>
-      <button id="btnFreeVoice" class="px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700">
-        Free Voice Call
-      </button>
-      <button id="btnUnlockWhatsApp" class="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
-        Unlock WhatsApp (Rs.${sanitizePrice(profileUser.whatsappUnlockPrice)})
-      </button>
-    `;
+    buttonContainer.textContent = '';
+
+    const btnFreeChat = document.createElement('button');
+    btnFreeChat.id = 'btnFreeChat';
+    btnFreeChat.className = 'px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700';
+    btnFreeChat.textContent = 'Free Chat';
+    buttonContainer.appendChild(btnFreeChat);
+
+    const btnFreeVoice = document.createElement('button');
+    btnFreeVoice.id = 'btnFreeVoice';
+    btnFreeVoice.className = 'px-6 py-3 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700';
+    btnFreeVoice.textContent = 'Free Voice Call';
+    buttonContainer.appendChild(btnFreeVoice);
+
+    const btnUnlockWhatsApp = document.createElement('button');
+    btnUnlockWhatsApp.id = 'btnUnlockWhatsApp';
+    btnUnlockWhatsApp.className = 'px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700';
+    btnUnlockWhatsApp.textContent = 'Unlock WhatsApp (Rs.' + sanitizePrice(profileUser.whatsappUnlockPrice) + ')';
+    buttonContainer.appendChild(btnUnlockWhatsApp);
 
     document.getElementById('btnFreeChat').addEventListener('click', function() {
       if (!currentUser) {
