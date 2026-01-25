@@ -111,18 +111,40 @@ async function loadWallet() {
     
     const historyDiv = document.getElementById('transactionHistory');
     if (transactions && transactions.length > 0) {
-      historyDiv.innerHTML = transactions.map(t => `
-        <div class="bg-gray-50 border rounded-lg p-3 text-sm">
-          <div class="flex justify-between">
-            <span class="font-medium">${t.type}</span>
-            <span class="${t.amount >= 0 ? 'text-green-600' : 'text-red-600'} font-bold">
-              ${t.amount >= 0 ? '+' : ''}$${Math.abs(t.amount / 100).toFixed(2)}
-            </span>
-          </div>
-          <div class="text-xs text-gray-500 mt-1">${new Date(t.createdAt).toLocaleString()}</div>
-          ${t.description ? `<div class="text-xs text-gray-600 mt-1">${t.description}</div>` : ''}
-        </div>
-      `).join('');
+      historyDiv.textContent = '';
+      transactions.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'bg-gray-50 border rounded-lg p-3 text-sm';
+
+        const row = document.createElement('div');
+        row.className = 'flex justify-between';
+
+        const typeSpan = document.createElement('span');
+        typeSpan.className = 'font-medium';
+        typeSpan.textContent = t.type;
+
+        const amountSpan = document.createElement('span');
+        amountSpan.className = (t.amount >= 0 ? 'text-green-600' : 'text-red-600') + ' font-bold';
+        amountSpan.textContent = (t.amount >= 0 ? '+' : '') + '$' + Math.abs(t.amount / 100).toFixed(2);
+
+        row.appendChild(typeSpan);
+        row.appendChild(amountSpan);
+        card.appendChild(row);
+
+        const dateDiv = document.createElement('div');
+        dateDiv.className = 'text-xs text-gray-500 mt-1';
+        dateDiv.textContent = new Date(t.createdAt).toLocaleString();
+        card.appendChild(dateDiv);
+
+        if (t.description) {
+          const descDiv = document.createElement('div');
+          descDiv.className = 'text-xs text-gray-600 mt-1';
+          descDiv.textContent = t.description;
+          card.appendChild(descDiv);
+        }
+
+        historyDiv.appendChild(card);
+      });
     }
   } catch (error) {
     console.error('Failed to load wallet:', error);
@@ -280,22 +302,40 @@ async function loadMessages() {
       return;
     }
     
-    messagesList.innerHTML = messages.map(msg => {
+    messagesList.innerHTML = '';
+    
+    messages.forEach(msg => {
       const isFromMe = msg.senderId === currentUser.id;
       const time = new Date(msg.createdAt).toLocaleString('en-US', { 
         month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
       });
       
-      return `
-        <div class="flex ${isFromMe ? 'justify-end' : 'justify-start'}">
-          <div class="max-w-[80%] ${isFromMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg p-3">
-            <p class="text-sm">${msg.message}</p>
-            ${msg.attachment ? `<img src="${msg.attachment}" class="mt-2 max-h-40 rounded">` : ''}
-            <p class="text-xs ${isFromMe ? 'text-blue-100' : 'text-gray-500'} mt-1">${time}</p>
-          </div>
-        </div>
-      `;
-    }).join('');
+      const wrapper = document.createElement('div');
+      wrapper.className = `flex ${isFromMe ? 'justify-end' : 'justify-start'}`;
+      
+      const bubble = document.createElement('div');
+      bubble.className = `max-w-[80%] ${isFromMe ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-800'} rounded-lg p-3`;
+      
+      const messageText = document.createElement('p');
+      messageText.className = 'text-sm';
+      messageText.textContent = msg.message;
+      bubble.appendChild(messageText);
+      
+      if (msg.attachment) {
+        const img = document.createElement('img');
+        img.className = 'mt-2 max-h-40 rounded';
+        img.src = msg.attachment;
+        bubble.appendChild(img);
+      }
+      
+      const timeText = document.createElement('p');
+      timeText.className = `text-xs ${isFromMe ? 'text-blue-100' : 'text-gray-500'} mt-1`;
+      timeText.textContent = time;
+      bubble.appendChild(timeText);
+      
+      wrapper.appendChild(bubble);
+      messagesList.appendChild(wrapper);
+    });
     
     messagesList.scrollTop = messagesList.scrollHeight;
   } catch (error) {
