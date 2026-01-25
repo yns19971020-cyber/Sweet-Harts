@@ -10,6 +10,19 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+function createStatusBadge(text, colorClass) {
+  const span = document.createElement('span');
+  span.className = `px-2 py-1 text-xs font-medium ${colorClass} rounded`;
+  span.textContent = text;
+  return span;
+}
+
+function createTableCell(className = 'px-6 py-4 whitespace-nowrap') {
+  const td = document.createElement('td');
+  td.className = className;
+  return td;
+}
+
 async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
@@ -102,55 +115,87 @@ function renderUsers() {
 
   filteredUsers.forEach(user => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td class="px-6 py-4 whitespace-nowrap">
-        <div class="flex items-center">
-          <img src="${escapeHtml(user.profileImage) || 'https://via.placeholder.com/40'}" alt="${escapeHtml(user.username)}" class="w-10 h-10 rounded-full mr-3 object-cover">
-          <div>
-            <div class="font-medium">${escapeHtml(user.username)}</div>
-            <div class="text-sm text-gray-500">${escapeHtml(user.email)}</div>
-          </div>
-        </div>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">${escapeHtml(user.gender)}</td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <span class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded">${escapeHtml(user.category)}</span>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <span class="text-sm">${escapeHtml(user.location) || 'Not set'}</span>
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        ${user.verified 
-          ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Verified</span>'
-          : '<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">Pending</span>'}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        ${user.priceActivationStatus === 'approved' 
-          ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Activated</span>'
-          : user.priceActivationStatus === 'pending'
-          ? '<span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">Pending</span>'
-          : '<span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">None</span>'}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        ${user.featured && user.featuredStatus === 'active'
-          ? '<span class="px-2 py-1 text-xs font-medium bg-yellow-100 text-yellow-800 rounded">Active</span>'
-          : user.featuredStatus === 'pending'
-          ? '<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">Pending</span>'
-          : '<span class="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded">None</span>'}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        ${user.subscriptionStatus === 'pending' 
-          ? '<span class="px-2 py-1 text-xs font-medium bg-orange-100 text-orange-800 rounded">Payment Pending</span>'
-          : user.subscriptionStatus === 'active'
-          ? '<span class="px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded">Active</span>'
-          : '<span class="px-2 py-1 text-xs font-medium bg-red-100 text-red-800 rounded">Expired</span>'}
-      </td>
-      <td class="px-6 py-4 whitespace-nowrap">
-        <button onclick="openUserModal('${escapeHtml(user.id)}')" class="px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">
-          Manage
-        </button>
-      </td>
-    `;
+
+    const tdUser = createTableCell();
+    const userContainer = document.createElement('div');
+    userContainer.className = 'flex items-center';
+    const img = document.createElement('img');
+    img.src = user.profileImage || 'https://via.placeholder.com/40';
+    img.alt = user.username || '';
+    img.className = 'w-10 h-10 rounded-full mr-3 object-cover';
+    const userInfo = document.createElement('div');
+    const userName = document.createElement('div');
+    userName.className = 'font-medium';
+    userName.textContent = user.username || '';
+    const userEmail = document.createElement('div');
+    userEmail.className = 'text-sm text-gray-500';
+    userEmail.textContent = user.email || '';
+    userInfo.appendChild(userName);
+    userInfo.appendChild(userEmail);
+    userContainer.appendChild(img);
+    userContainer.appendChild(userInfo);
+    tdUser.appendChild(userContainer);
+    tr.appendChild(tdUser);
+
+    const tdGender = createTableCell();
+    tdGender.textContent = user.gender || '';
+    tr.appendChild(tdGender);
+
+    const tdCategory = createTableCell();
+    tdCategory.appendChild(createStatusBadge(user.category || '', 'bg-blue-100 text-blue-800'));
+    tr.appendChild(tdCategory);
+
+    const tdLocation = createTableCell();
+    const locationSpan = document.createElement('span');
+    locationSpan.className = 'text-sm';
+    locationSpan.textContent = user.location || 'Not set';
+    tdLocation.appendChild(locationSpan);
+    tr.appendChild(tdLocation);
+
+    const tdVerified = createTableCell();
+    tdVerified.appendChild(user.verified
+      ? createStatusBadge('Verified', 'bg-green-100 text-green-800')
+      : createStatusBadge('Pending', 'bg-orange-100 text-orange-800'));
+    tr.appendChild(tdVerified);
+
+    const tdPriceStatus = createTableCell();
+    if (user.priceActivationStatus === 'approved') {
+      tdPriceStatus.appendChild(createStatusBadge('Activated', 'bg-green-100 text-green-800'));
+    } else if (user.priceActivationStatus === 'pending') {
+      tdPriceStatus.appendChild(createStatusBadge('Pending', 'bg-yellow-100 text-yellow-800'));
+    } else {
+      tdPriceStatus.appendChild(createStatusBadge('None', 'bg-gray-100 text-gray-800'));
+    }
+    tr.appendChild(tdPriceStatus);
+
+    const tdFeatured = createTableCell();
+    if (user.featured && user.featuredStatus === 'active') {
+      tdFeatured.appendChild(createStatusBadge('Active', 'bg-yellow-100 text-yellow-800'));
+    } else if (user.featuredStatus === 'pending') {
+      tdFeatured.appendChild(createStatusBadge('Pending', 'bg-orange-100 text-orange-800'));
+    } else {
+      tdFeatured.appendChild(createStatusBadge('None', 'bg-gray-100 text-gray-800'));
+    }
+    tr.appendChild(tdFeatured);
+
+    const tdSubscription = createTableCell();
+    if (user.subscriptionStatus === 'pending') {
+      tdSubscription.appendChild(createStatusBadge('Payment Pending', 'bg-orange-100 text-orange-800'));
+    } else if (user.subscriptionStatus === 'active') {
+      tdSubscription.appendChild(createStatusBadge('Active', 'bg-green-100 text-green-800'));
+    } else {
+      tdSubscription.appendChild(createStatusBadge('Expired', 'bg-red-100 text-red-800'));
+    }
+    tr.appendChild(tdSubscription);
+
+    const tdActions = createTableCell();
+    const manageBtn = document.createElement('button');
+    manageBtn.className = 'px-3 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700';
+    manageBtn.textContent = 'Manage';
+    manageBtn.addEventListener('click', () => openUserModal(user.id));
+    tdActions.appendChild(manageBtn);
+    tr.appendChild(tdActions);
+
     tbody.appendChild(tr);
   });
 }
