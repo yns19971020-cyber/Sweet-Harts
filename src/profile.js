@@ -79,39 +79,89 @@ function displayProfile() {
 
   if (profileUser.canSetPrice && profileUser.priceActivationStatus === 'approved' && profileUser.whatsappUnlockPrice) {
     notActivatedMessage.classList.add('hidden');
-    pricingSection.innerHTML = `
-      <div class="col-span-full bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-200">
-        <h3 class="text-lg font-bold mb-4 text-green-800">FREE Services (Use Now)</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-          <div class="bg-white p-4 rounded-lg border border-green-300">
-            <div class="text-sm text-gray-600 mb-1">Private Chat</div>
-            <div class="text-2xl font-bold text-green-600">FREE</div>
-          </div>
-          <div class="bg-white p-4 rounded-lg border border-green-300">
-            <div class="text-sm text-gray-600 mb-1">Voice Call</div>
-            <div class="text-2xl font-bold text-green-600">FREE</div>
-          </div>
-        </div>
-      </div>
+    pricingSection.textContent = '';
 
-      <div class="col-span-full bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border-2 border-blue-300 mt-4">
-        <h3 class="text-lg font-bold mb-3 text-blue-800">WhatsApp Video Call - Unlock</h3>
-        <div class="bg-white p-5 rounded-lg border border-blue-300">
-          <div class="text-sm text-gray-600 mb-2">WhatsApp Contact Unlock Price</div>
-          <div class="text-3xl font-bold text-blue-600 mb-2">Rs. ${sanitizePrice(profileUser.whatsappUnlockPrice)}</div>
-          <div class="text-sm text-gray-600">
-            <p class="mb-2">Unlocking WhatsApp gives you:</p>
-            <ul class="list-disc list-inside text-xs text-gray-700 space-y-1">
-              <li>WhatsApp Video Calls</li>
-              <li>WhatsApp Photos & Files sharing</li>
-              <li>Direct contact 24/7</li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    `;
+    const freeServicesSection = document.createElement('div');
+    freeServicesSection.className = 'col-span-full bg-gradient-to-r from-green-50 to-blue-50 p-6 rounded-lg border-2 border-green-200';
+
+    const freeTitle = document.createElement('h3');
+    freeTitle.className = 'text-lg font-bold mb-4 text-green-800';
+    freeTitle.textContent = 'FREE Services (Use Now)';
+    freeServicesSection.appendChild(freeTitle);
+
+    const freeGrid = document.createElement('div');
+    freeGrid.className = 'grid grid-cols-1 md:grid-cols-2 gap-3 mb-4';
+
+    const chatCard = document.createElement('div');
+    chatCard.className = 'bg-white p-4 rounded-lg border border-green-300';
+    const chatLabel = document.createElement('div');
+    chatLabel.className = 'text-sm text-gray-600 mb-1';
+    chatLabel.textContent = 'Private Chat';
+    const chatPrice = document.createElement('div');
+    chatPrice.className = 'text-2xl font-bold text-green-600';
+    chatPrice.textContent = 'FREE';
+    chatCard.appendChild(chatLabel);
+    chatCard.appendChild(chatPrice);
+
+    const voiceCard = document.createElement('div');
+    voiceCard.className = 'bg-white p-4 rounded-lg border border-green-300';
+    const voiceLabel = document.createElement('div');
+    voiceLabel.className = 'text-sm text-gray-600 mb-1';
+    voiceLabel.textContent = 'Voice Call';
+    const voicePrice = document.createElement('div');
+    voicePrice.className = 'text-2xl font-bold text-green-600';
+    voicePrice.textContent = 'FREE';
+    voiceCard.appendChild(voiceLabel);
+    voiceCard.appendChild(voicePrice);
+
+    freeGrid.appendChild(chatCard);
+    freeGrid.appendChild(voiceCard);
+    freeServicesSection.appendChild(freeGrid);
+    pricingSection.appendChild(freeServicesSection);
+
+    const whatsappSection = document.createElement('div');
+    whatsappSection.className = 'col-span-full bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border-2 border-blue-300 mt-4';
+
+    const whatsappTitle = document.createElement('h3');
+    whatsappTitle.className = 'text-lg font-bold mb-3 text-blue-800';
+    whatsappTitle.textContent = 'WhatsApp Video Call - Unlock';
+    whatsappSection.appendChild(whatsappTitle);
+
+    const whatsappCard = document.createElement('div');
+    whatsappCard.className = 'bg-white p-5 rounded-lg border border-blue-300';
+
+    const priceLabel = document.createElement('div');
+    priceLabel.className = 'text-sm text-gray-600 mb-2';
+    priceLabel.textContent = 'WhatsApp Contact Unlock Price';
+
+    const priceValue = document.createElement('div');
+    priceValue.className = 'text-3xl font-bold text-blue-600 mb-2';
+    priceValue.textContent = 'Rs. ' + sanitizePrice(profileUser.whatsappUnlockPrice);
+
+    const benefitsDesc = document.createElement('div');
+    benefitsDesc.className = 'text-sm text-gray-600';
+
+    const benefitsIntro = document.createElement('p');
+    benefitsIntro.className = 'mb-2';
+    benefitsIntro.textContent = 'Unlocking WhatsApp gives you:';
+
+    const benefitsList = document.createElement('ul');
+    benefitsList.className = 'list-disc list-inside text-xs text-gray-700 space-y-1';
+    ['WhatsApp Video Calls', 'WhatsApp Photos & Files sharing', 'Direct contact 24/7'].forEach(text => {
+      const li = document.createElement('li');
+      li.textContent = text;
+      benefitsList.appendChild(li);
+    });
+
+    benefitsDesc.appendChild(benefitsIntro);
+    benefitsDesc.appendChild(benefitsList);
+    whatsappCard.appendChild(priceLabel);
+    whatsappCard.appendChild(priceValue);
+    whatsappCard.appendChild(benefitsDesc);
+    whatsappSection.appendChild(whatsappCard);
+    pricingSection.appendChild(whatsappSection);
   } else {
-    pricingSection.innerHTML = '';
+    pricingSection.textContent = '';
     notActivatedMessage.classList.remove('hidden');
   }
 
@@ -119,7 +169,11 @@ function displayProfile() {
 
   if (!profileUser.verified || !profileUser.canSetPrice) {
     lockMessage.classList.remove('hidden');
-    lockMessage.innerHTML = '<strong>Profile Locked:</strong> This profile has not completed verification and activation yet.';
+    lockMessage.textContent = '';
+    const lockStrong = document.createElement('strong');
+    lockStrong.textContent = 'Profile Locked:';
+    lockMessage.appendChild(lockStrong);
+    lockMessage.appendChild(document.createTextNode(' This profile has not completed verification and activation yet.'));
   } else {
     lockMessage.classList.add('hidden');
     
