@@ -1,5 +1,10 @@
 const API_BASE = '';
 
+function sanitizePrice(value) {
+  const num = parseFloat(value);
+  return isNaN(num) ? '0' : num.toString();
+}
+
 async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
@@ -93,7 +98,7 @@ function displayProfile() {
         <h3 class="text-lg font-bold mb-3 text-blue-800">WhatsApp Video Call - Unlock</h3>
         <div class="bg-white p-5 rounded-lg border border-blue-300">
           <div class="text-sm text-gray-600 mb-2">WhatsApp Contact Unlock Price</div>
-          <div class="text-3xl font-bold text-blue-600 mb-2">Rs. ${profileUser.whatsappUnlockPrice}</div>
+          <div class="text-3xl font-bold text-blue-600 mb-2">Rs. ${sanitizePrice(profileUser.whatsappUnlockPrice)}</div>
           <div class="text-sm text-gray-600">
             <p class="mb-2">Unlocking WhatsApp gives you:</p>
             <ul class="list-disc list-inside text-xs text-gray-700 space-y-1">
@@ -127,7 +132,7 @@ function displayProfile() {
         Free Voice Call
       </button>
       <button id="btnUnlockWhatsApp" class="px-6 py-3 bg-purple-600 text-white rounded-lg font-medium hover:bg-purple-700">
-        Unlock WhatsApp (Rs.${profileUser.whatsappUnlockPrice})
+        Unlock WhatsApp (Rs.${sanitizePrice(profileUser.whatsappUnlockPrice)})
       </button>
     `;
 
