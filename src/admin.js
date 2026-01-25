@@ -347,7 +347,7 @@ async function loadMessages() {
       `;
     }
     
-    messagesList.innerHTML = html;
+    messagesList.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
   } catch (error) {
     console.error('Failed to load messages:', error);
     document.getElementById('messagesList').innerHTML = '<p class="text-red-500 text-center py-4">Failed to load messages</p>';
