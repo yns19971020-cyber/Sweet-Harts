@@ -295,8 +295,8 @@ async function loadMessages() {
             `}).join('')}
           </div>
           <div class="mt-3 flex gap-2">
-            <input type="text" id="reply-${userId}" placeholder="Reply to user..." class="flex-1 px-3 py-2 border rounded-md text-sm">
-            <button onclick="sendReply('${userId}')" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">Send</button>
+            <input type="text" id="reply-${escapeHtml(userId)}" placeholder="Reply to user..." class="flex-1 px-3 py-2 border rounded-md text-sm">
+            <button onclick="sendReply('${escapeHtml(userId)}')" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">Send</button>
           </div>
         </div>
       `;
