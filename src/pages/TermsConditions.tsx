@@ -24,7 +24,7 @@ export default function TermsConditions({ onBack }: TermsConditionsProps) {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Agreement to Terms</h2>
             <p className="text-gray-700 leading-relaxed">
-              By accessing or using PrivateConnect ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services. These terms apply to all visitors, users, and others who access or use the Platform.
+              By accessing or using Sweet Hearts ("the Platform"), you agree to be bound by these Terms and Conditions. If you do not agree to these terms, please do not use our services. These terms apply to all visitors, users, and others who access or use the Platform.
             </p>
           </section>
 
@@ -65,7 +65,7 @@ export default function TermsConditions({ onBack }: TermsConditionsProps) {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">5. Profile Verification</h2>
             <p className="text-gray-700 leading-relaxed">
-              All profiles on PrivateConnect are subject to admin verification. We reserve the right to approve, reject, or remove any profile at our discretion. Verified profiles have been reviewed by our team, but verification does not guarantee the accuracy of all information provided by users.
+              All profiles on Sweet Hearts are subject to admin verification. We reserve the right to approve, reject, or remove any profile at our discretion. Verified profiles have been reviewed by our team, but verification does not guarantee the accuracy of all information provided by users.
             </p>
           </section>
 
@@ -117,14 +117,14 @@ export default function TermsConditions({ onBack }: TermsConditionsProps) {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">11. Limitation of Liability</h2>
             <p className="text-gray-700 leading-relaxed">
-              To the maximum extent permitted by law, PrivateConnect shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Platform. Our total liability shall not exceed the amount you paid us in the past twelve months.
+              To the maximum extent permitted by law, Sweet Hearts shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the Platform. Our total liability shall not exceed the amount you paid us in the past twelve months.
             </p>
           </section>
 
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">12. Indemnification</h2>
             <p className="text-gray-700 leading-relaxed">
-              You agree to indemnify and hold harmless PrivateConnect, its officers, directors, employees, and agents from any claims, damages, losses, or expenses arising from your use of the Platform or violation of these Terms.
+              You agree to indemnify and hold harmless Sweet Hearts, its officers, directors, employees, and agents from any claims, damages, losses, or expenses arising from your use of the Platform or violation of these Terms.
             </p>
           </section>
 
@@ -148,8 +148,8 @@ export default function TermsConditions({ onBack }: TermsConditionsProps) {
               For questions about these Terms and Conditions, please contact us at:
             </p>
             <p className="text-gray-700 mt-2">
-              Email: support@privateconnect.lk<br />
-              Website: www.privateconnect.lk
+              Email: support@sweethearts.lk<br />
+              Website: www.sweethearts.lk
             </p>
           </section>
         </div>

@@ -24,7 +24,7 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
           <section>
             <h2 className="text-xl font-semibold text-gray-900 mb-4">1. Introduction</h2>
             <p className="text-gray-700 leading-relaxed">
-              Welcome to PrivateConnect ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
+              Welcome to Sweet Hearts ("we," "our," or "us"). We are committed to protecting your personal information and your right to privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website and use our services.
             </p>
           </section>
 
@@ -120,8 +120,8 @@ export default function PrivacyPolicy({ onBack }: PrivacyPolicyProps) {
               If you have any questions about this Privacy Policy, please contact us at:
             </p>
             <p className="text-gray-700 mt-2">
-              Email: support@privateconnect.lk<br />
-              Website: www.privateconnect.lk
+              Email: support@sweethearts.lk<br />
+              Website: www.sweethearts.lk
             </p>
           </section>
         </div>

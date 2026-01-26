@@ -1,7 +1,7 @@
-# PrivateConnect
+# Sweet Hearts
 
 ## Overview
-PrivateConnect is a Sri Lankan premium classified ads platform with real payments and real data. No demo/mock data - everything uses PostgreSQL database and Stripe payments.
+Sweet Hearts (formerly PrivateConnect) is a Sri Lankan premium dating and connections platform with real payments and real data. Tagline: "Real connections, real feelings". No demo/mock data - everything uses PostgreSQL database and Stripe payments.
 
 ## Tech Stack
 - **Frontend**: React 18 + TypeScript + Vite

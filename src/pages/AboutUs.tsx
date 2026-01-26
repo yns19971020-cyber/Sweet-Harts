@@ -8,7 +8,7 @@ interface AboutUsProps {
 export default function AboutUs({ onBack }: AboutUsProps) {
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-gradient-to-r from-blue-600 to-blue-800 text-white">
+      <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white">
         <div className="max-w-4xl mx-auto px-4 py-4">
           <Button variant="ghost" onClick={onBack} className="mb-4 text-white hover:bg-white/20">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -16,9 +16,9 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           </Button>
         </div>
         <div className="max-w-4xl mx-auto px-4 pb-16 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">About PrivateConnect</h1>
-          <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-            Sri Lanka's Premier Verified Classified Ads Platform for Trusted Connections
+          <h1 className="text-4xl md:text-5xl font-bold mb-4">About Sweet Hearts</h1>
+          <p className="text-xl text-pink-100 max-w-2xl mx-auto">
+            Real connections, real feelings - Sri Lanka's Premier Platform for Love
           </p>
         </div>
       </div>
@@ -27,14 +27,14 @@ export default function AboutUs({ onBack }: AboutUsProps) {
         <div className="bg-white rounded-xl shadow-lg p-8 -mt-8 mb-12">
           <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Our Mission</h2>
           <p className="text-gray-700 text-lg leading-relaxed text-center">
-            PrivateConnect is dedicated to providing a safe, secure, and trusted platform for adults in Sri Lanka to connect with verified profiles. We prioritize user safety, privacy, and quality connections through our rigorous verification process and premium features.
+            Sweet Hearts is dedicated to providing a safe, secure, and trusted platform for adults in Sri Lanka to connect with verified profiles. We prioritize user safety, privacy, and quality connections through our rigorous verification process and premium features.
           </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-              <Shield className="w-6 h-6 text-blue-600" />
+            <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
+              <Shield className="w-6 h-6 text-pink-600" />
             </div>
             <h3 className="text-xl font-semibold text-gray-900 mb-3">Admin Verified Profiles</h3>
             <p className="text-gray-600">
@@ -73,8 +73,8 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           </div>
         </div>
 
-        <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 mb-12">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Why Choose PrivateConnect?</h2>
+        <div className="bg-gradient-to-r from-pink-50 to-orange-50 rounded-xl p-8 mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Why Choose Sweet Hearts?</h2>
           <div className="grid md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-md">
@@ -122,22 +122,22 @@ export default function AboutUs({ onBack }: AboutUsProps) {
           </div>
         </div>
 
-        <div className="bg-blue-600 text-white rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold mb-4">Ready to Connect?</h2>
-          <p className="text-blue-100 mb-6 max-w-lg mx-auto">
-            Join thousands of verified users on Sri Lanka's most trusted classified ads platform. Register today and start making genuine connections.
+        <div className="bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 text-white rounded-xl p-8 text-center">
+          <h2 className="text-2xl font-bold mb-4">Ready to Find Your Match?</h2>
+          <p className="text-pink-100 mb-6 max-w-lg mx-auto">
+            Join thousands of verified users on Sri Lanka's most trusted platform for real connections. Register today and find your perfect match.
           </p>
-          <Button onClick={onBack} className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg font-semibold">
+          <Button onClick={onBack} className="bg-white text-pink-600 hover:bg-pink-50 px-8 py-3 text-lg font-semibold">
             Browse Profiles
           </Button>
         </div>
 
         <div className="mt-12 text-center text-gray-600">
           <p className="text-sm">
-            PrivateConnect is an 18+ platform. All users must be adults to register and use our services.
+            Sweet Hearts is an 18+ platform. All users must be adults to register and use our services.
           </p>
           <p className="text-sm mt-2">
-            Contact us: support@privateconnect.lk | www.privateconnect.lk
+            Contact us: support@sweethearts.lk | www.sweethearts.lk
           </p>
         </div>
       </div>

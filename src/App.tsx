@@ -257,9 +257,9 @@ function App() {
             <footer className="mt-12 pt-8 border-t border-border">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <div>
-                  <h3 className="font-semibold text-foreground mb-3">About PrivateConnect</h3>
+                  <h3 className="font-semibold text-foreground mb-3">About Sweet Hearts</h3>
                   <p className="text-sm text-muted-foreground">
-                    Sri Lanka's premier verified classified ads platform. All profiles are admin-verified for your safety and trust.
+                    Sri Lanka's premier platform for real connections. All profiles are admin-verified for your safety and trust. Real connections, real feelings.
                   </p>
                 </div>
                 <div>
@@ -294,14 +294,14 @@ function App() {
                 <div>
                   <h3 className="font-semibold text-foreground mb-3">Contact</h3>
                   <ul className="space-y-2 text-sm text-muted-foreground">
-                    <li>Email: support@privateconnect.lk</li>
-                    <li>Website: www.privateconnect.lk</li>
+                    <li>Email: support@sweethearts.lk</li>
+                    <li>Website: www.sweethearts.lk</li>
                   </ul>
                 </div>
               </div>
               <div className="text-center text-sm text-muted-foreground py-4 border-t border-border">
-                <p>&copy; 2026 PrivateConnect. All rights reserved.</p>
-                <p className="mt-1">18+ Adults Only Platform</p>
+                <p>&copy; 2026 Sweet Hearts. All rights reserved.</p>
+                <p className="mt-1">Real connections, real feelings | 18+ Adults Only</p>
               </div>
             </footer>
           </div>
