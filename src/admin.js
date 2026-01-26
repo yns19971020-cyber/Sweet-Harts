@@ -347,7 +347,12 @@ async function loadMessages() {
       `;
     }
     
-    messagesList.innerHTML = typeof DOMPurify !== 'undefined' ? DOMPurify.sanitize(html) : html;
+    if (typeof DOMPurify === 'undefined') {
+      console.error('DOMPurify is required for safe HTML rendering');
+      messagesList.textContent = 'Unable to load messages securely. Please refresh the page.';
+      return;
+    }
+    messagesList.innerHTML = DOMPurify.sanitize(html);
   } catch (error) {
     console.error('Failed to load messages:', error);
     document.getElementById('messagesList').innerHTML = '<p class="text-red-500 text-center py-4">Failed to load messages</p>';
