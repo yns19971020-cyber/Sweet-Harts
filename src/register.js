@@ -21,15 +21,13 @@ async function apiRequest(endpoint, options = {}) {
 let selfieData = '';
 let videoStream = null;
 
-const cameraSection = document.getElementById('cameraSection');
-const btnStartCamera = document.getElementById('btnStartCamera');
-const videoPreview = document.getElementById('videoPreview');
+const videoPreview = document.getElementById('cameraPreview');
+const capturedPhoto = document.getElementById('capturedPhoto');
+const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+const btnOpenCamera = document.getElementById('btnOpenCamera');
 const btnCapture = document.getElementById('btnCapture');
-const selfiePreview = document.getElementById('selfiePreview');
-const selfieDataInput = document.getElementById('selfieData');
 const btnRetake = document.getElementById('btnRetake');
-const captureSection = document.getElementById('captureSection');
-const retakeSection = document.getElementById('retakeSection');
+const selfieDataInput = document.getElementById('selfieData');
 
 console.log('=== CAMERA SYSTEM DEBUG INFO ===');
 console.log('URL:', window.location.href);
@@ -78,7 +76,7 @@ navigator.mediaDevices.enumerateDevices()
 
 console.log('=== END DEBUG INFO ===');
 
-btnStartCamera.addEventListener('click', async function() {
+btnOpenCamera.addEventListener('click', async function() {
   try {
     console.log('Requesting camera access...');
     
@@ -97,9 +95,10 @@ btnStartCamera.addEventListener('click', async function() {
     videoPreview.srcObject = videoStream;
     await videoPreview.play();
     
-    cameraSection.classList.remove('hidden');
-    captureSection.classList.remove('hidden');
-    btnStartCamera.classList.add('hidden');
+    cameraPlaceholder.classList.add('hidden');
+    videoPreview.classList.remove('hidden');
+    btnOpenCamera.classList.add('hidden');
+    btnCapture.classList.remove('hidden');
     
     console.log('Camera stream active');
   } catch (err) {
@@ -126,7 +125,7 @@ btnStartCamera.addEventListener('click', async function() {
 });
 
 btnCapture.addEventListener('click', function() {
-  const canvas = document.createElement('canvas');
+  const canvas = capturedPhoto;
   canvas.width = videoPreview.videoWidth || 640;
   canvas.height = videoPreview.videoHeight || 480;
   
@@ -143,21 +142,19 @@ btnCapture.addEventListener('click', function() {
     videoStream = null;
   }
   
-  cameraSection.classList.add('hidden');
-  captureSection.classList.add('hidden');
-  selfiePreview.src = selfieData;
-  selfiePreview.classList.remove('hidden');
-  retakeSection.classList.remove('hidden');
-  btnStartCamera.classList.add('hidden');
+  videoPreview.classList.add('hidden');
+  btnCapture.classList.add('hidden');
+  capturedPhoto.classList.remove('hidden');
+  btnRetake.classList.remove('hidden');
 });
 
 btnRetake.addEventListener('click', function() {
   selfieData = '';
   selfieDataInput.value = '';
-  selfiePreview.classList.add('hidden');
-  retakeSection.classList.add('hidden');
-  btnStartCamera.classList.remove('hidden');
-  cameraSection.classList.add('hidden');
+  capturedPhoto.classList.add('hidden');
+  btnRetake.classList.add('hidden');
+  btnOpenCamera.classList.remove('hidden');
+  cameraPlaceholder.classList.remove('hidden');
 });
 
 const paymentMethodSelect = document.getElementById('paymentMethod');
