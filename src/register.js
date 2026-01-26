@@ -164,6 +164,29 @@ const paymentMethodSelect = document.getElementById('paymentMethod');
 const bankDetailsSection = document.getElementById('bankDetailsSection');
 const bankDetailsContent = document.getElementById('bankDetailsContent');
 
+function renderBankDetails(container, bankDetails) {
+  container.textContent = '';
+  
+  const bankNameP = document.createElement('p');
+  const strong = document.createElement('strong');
+  strong.textContent = bankDetails.bankName;
+  bankNameP.appendChild(strong);
+  
+  const accountP = document.createElement('p');
+  accountP.textContent = 'Account: ' + bankDetails.accountNumber;
+  
+  const nameP = document.createElement('p');
+  nameP.textContent = 'Name: ' + bankDetails.accountName;
+  
+  const branchP = document.createElement('p');
+  branchP.textContent = 'Branch: ' + bankDetails.branch;
+  
+  container.appendChild(bankNameP);
+  container.appendChild(accountP);
+  container.appendChild(nameP);
+  container.appendChild(branchP);
+}
+
 paymentMethodSelect.addEventListener('change', async function() {
   const method = this.value;
   
@@ -171,22 +194,12 @@ paymentMethodSelect.addEventListener('change', async function() {
     bankDetailsSection.classList.remove('hidden');
     const response = await fetch('/api/bank-details?bank=sampath');
     const bankDetails = await response.json();
-    bankDetailsContent.innerHTML = `
-      <p><strong>${bankDetails.bankName}</strong></p>
-      <p>Account: ${bankDetails.accountNumber}</p>
-      <p>Name: ${bankDetails.accountName}</p>
-      <p>Branch: ${bankDetails.branch}</p>
-    `;
+    renderBankDetails(bankDetailsContent, bankDetails);
   } else if (method === 'commercial_bank') {
     bankDetailsSection.classList.remove('hidden');
     const response = await fetch('/api/bank-details?bank=commercial');
     const bankDetails = await response.json();
-    bankDetailsContent.innerHTML = `
-      <p><strong>${bankDetails.bankName}</strong></p>
-      <p>Account: ${bankDetails.accountNumber}</p>
-      <p>Name: ${bankDetails.accountName}</p>
-      <p>Branch: ${bankDetails.branch}</p>
-    `;
+    renderBankDetails(bankDetailsContent, bankDetails);
   } else if (method === 'binance') {
     bankDetailsSection.classList.remove('hidden');
     bankDetailsContent.innerHTML = `
