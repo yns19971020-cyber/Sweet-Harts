@@ -352,12 +352,22 @@ export function registerRoutes(app: Express) {
   });
 
   app.get('/api/bank-details', (req, res) => {
-    res.json({
-      bankName: 'Sampath Bank',
-      accountNumber: '105057458082',
-      accountName: 'J A Y S Kavinda',
-      branch: 'Kadawatha'
-    });
+    const bank = req.query.bank;
+    if (bank === 'commercial') {
+      res.json({
+        bankName: 'Commercial Bank',
+        accountNumber: process.env.COMMERCIAL_BANK_ACCOUNT || '',
+        accountName: process.env.COMMERCIAL_BANK_NAME || '',
+        branch: process.env.COMMERCIAL_BANK_BRANCH || ''
+      });
+    } else {
+      res.json({
+        bankName: 'Sampath Bank',
+        accountNumber: process.env.SAMPATH_BANK_ACCOUNT || '',
+        accountName: process.env.SAMPATH_BANK_NAME || '',
+        branch: process.env.SAMPATH_BANK_BRANCH || ''
+      });
+    }
   });
 
   app.post('/api/messages', authMiddleware, async (req: AuthRequest, res) => {

@@ -43,3 +43,13 @@ externalPort = 80
 deploymentTarget = "autoscale"
 run = ["npm", "run", "start"]
 build = ["npm", "run", "build"]
+
+[userenv]
+
+[userenv.shared]
+SAMPATH_BANK_ACCOUNT = "105057458082"
+SAMPATH_BANK_NAME = "J A Y S Kavinda"
+SAMPATH_BANK_BRANCH = "Kadawatha"
+COMMERCIAL_BANK_ACCOUNT = "8007739640"
+COMMERCIAL_BANK_NAME = "J A Y S Kavinda"
+COMMERCIAL_BANK_BRANCH = "Kadawatha"

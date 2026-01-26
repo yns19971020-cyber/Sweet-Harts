@@ -228,12 +228,16 @@ function displayProfile() {
         return;
       }
 
-      alert(`WhatsApp Unlock කිරීමට:\n\n` +
-        `1. බැංකු ගිණුමට Rs.${profileUser.whatsappUnlockPrice} මුදල් යොමු කරන්න:\n` +
-        `   Sampath Bank - 105057458082\n` +
-        `   J A Y S Kavinda (Kadawatha)\n\n` +
-        `2. ඔබගේ Dashboard එකේ "Admin වෙත පණිවිඩය" බොත්තම ඔබා රිසිට් එක එවන්න.\n\n` +
-        `3. Admin විසින් සත්‍යාපනය කළ පසු WhatsApp අංකය unlock වේ.`);
+      fetch('/api/bank-details')
+        .then(res => res.json())
+        .then(bankDetails => {
+          alert(`WhatsApp Unlock කිරීමට:\n\n` +
+            `1. බැංකු ගිණුමට Rs.${profileUser.whatsappUnlockPrice} මුදල් යොමු කරන්න:\n` +
+            `   ${bankDetails.bankName} - ${bankDetails.accountNumber}\n` +
+            `   ${bankDetails.accountName} (${bankDetails.branch})\n\n` +
+            `2. ඔබගේ Dashboard එකේ "Admin වෙත පණිවිඩය" බොත්තම ඔබා රිසිට් එක එවන්න.\n\n` +
+            `3. Admin විසින් සත්‍යාපනය කළ පසු WhatsApp අංකය unlock වේ.`);
+        });
       
       window.location.href = '/dashboard.html';
     });

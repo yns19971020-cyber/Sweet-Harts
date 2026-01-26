@@ -164,24 +164,28 @@ const paymentMethodSelect = document.getElementById('paymentMethod');
 const bankDetailsSection = document.getElementById('bankDetailsSection');
 const bankDetailsContent = document.getElementById('bankDetailsContent');
 
-paymentMethodSelect.addEventListener('change', function() {
+paymentMethodSelect.addEventListener('change', async function() {
   const method = this.value;
   
   if (method === 'sampath_bank') {
     bankDetailsSection.classList.remove('hidden');
+    const response = await fetch('/api/bank-details?bank=sampath');
+    const bankDetails = await response.json();
     bankDetailsContent.innerHTML = `
-      <p><strong>Sampath Bank</strong></p>
-      <p>Account: 105057458082</p>
-      <p>Name: J A Y S Kavinda</p>
-      <p>Branch: Kadawatha</p>
+      <p><strong>${bankDetails.bankName}</strong></p>
+      <p>Account: ${bankDetails.accountNumber}</p>
+      <p>Name: ${bankDetails.accountName}</p>
+      <p>Branch: ${bankDetails.branch}</p>
     `;
   } else if (method === 'commercial_bank') {
     bankDetailsSection.classList.remove('hidden');
+    const response = await fetch('/api/bank-details?bank=commercial');
+    const bankDetails = await response.json();
     bankDetailsContent.innerHTML = `
-      <p><strong>Commercial Bank</strong></p>
-      <p>Account: 8007739640</p>
-      <p>Name: J A Y S Kavinda</p>
-      <p>Branch: Kadawatha</p>
+      <p><strong>${bankDetails.bankName}</strong></p>
+      <p>Account: ${bankDetails.accountNumber}</p>
+      <p>Name: ${bankDetails.accountName}</p>
+      <p>Branch: ${bankDetails.branch}</p>
     `;
   } else if (method === 'binance') {
     bankDetailsSection.classList.remove('hidden');
