@@ -171,31 +171,29 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header
-        currentUser={currentUser}
-        onLoginClick={() => setShowLoginModal(true)}
-        onLogout={handleLogout}
-        onMenuClick={() => setSidebarOpen(!sidebarOpen)}
-      />
+    <div 
+      className="min-h-screen bg-cover bg-center bg-fixed"
+      style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
+    >
+      <div className="min-h-screen bg-black/40">
+        <Header
+          currentUser={currentUser}
+          onLoginClick={() => setShowLoginModal(true)}
+          onLogout={handleLogout}
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+        />
 
-      <div 
-        className="relative h-80 md:h-96 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: 'url(/images/hero-bg.jpg)' }}
-      >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-black/50" />
-        <div className="absolute inset-0 flex flex-col items-center justify-center text-center text-white px-4">
-          <h1 className="text-3xl md:text-5xl font-bold mb-3 drop-shadow-lg">
+        <div className="text-center py-12 px-4">
+          <h1 className="text-3xl md:text-5xl font-bold mb-3 text-white drop-shadow-lg">
             ඔබේ සිතැඟි පරිදි Girl කෙනෙක් හෝ Boy කෙනෙක්
           </h1>
-          <p className="text-xl md:text-2xl mb-2 drop-shadow-md">
+          <p className="text-xl md:text-2xl mb-2 text-white drop-shadow-md">
             හොයාගන්න මෙන්න එකම තැන
           </p>
           <p className="text-lg italic text-pink-200 drop-shadow-md">Love begins online</p>
         </div>
-      </div>
 
-      <div className="flex">
+        <div className="flex">
         <Sidebar
           selectedCategory={selectedCategory}
           onCategorySelect={(cat) => {
@@ -330,6 +328,7 @@ function App() {
           onLogin={handleLogin}
         />
       )}
+      </div>
     </div>
   );
 }
