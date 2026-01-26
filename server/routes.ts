@@ -2,6 +2,7 @@ import express, { type Express, type Request, type Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { storage } from './storage';
+import { saveSubscription, removeSubscription, sendMessageNotification, getVapidPublicKey } from './pushService';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'privateconnect-secret-key-2024';
 
@@ -403,6 +404,13 @@ export function registerRoutes(app: Express) {
         attachment,
       });
 
+      // Send push notification to admin
+      try {
+        await sendMessageNotification(req.user.id, admin.id, message);
+      } catch (e) {
+        console.log('Push notification failed (non-critical):', e);
+      }
+
       res.json({ message: msg });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
@@ -462,6 +470,32 @@ export function registerRoutes(app: Express) {
   app.put('/api/messages/read/:senderId', authMiddleware, async (req: AuthRequest, res) => {
     try {
       await storage.markMessagesAsRead(req.user.id, req.params.senderId as string);
+      res.json({ success: true });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Push Notification Routes
+  app.get('/api/push/vapid-public-key', (req, res) => {
+    res.json({ publicKey: getVapidPublicKey() });
+  });
+
+  app.post('/api/push/subscribe', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { subscription, deviceInfo } = req.body;
+      const result = await saveSubscription(req.user.id, subscription, deviceInfo);
+      res.json({ success: true, subscription: result });
+    } catch (error: any) {
+      console.error('Push subscription error:', error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.post('/api/push/unsubscribe', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { endpoint } = req.body;
+      await removeSubscription(endpoint, req.user.id);
       res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });

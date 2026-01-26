@@ -98,6 +98,45 @@ export const messages = pgTable('messages', {
   createdAt: timestamp('created_at').defaultNow(),
 });
 
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
+  deviceInfo: text('device_info'),
+  isActive: boolean('is_active').default(true),
+  createdAt: timestamp('created_at').defaultNow(),
+  updatedAt: timestamp('updated_at').defaultNow(),
+});
+
+export const notifications = pgTable('notifications', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  title: text('title').notNull(),
+  body: text('body').notNull(),
+  type: text('type').notNull(),
+  relatedId: uuid('related_id'),
+  isRead: boolean('is_read').default(false),
+  isSent: boolean('is_sent').default(false),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
+export const calls = pgTable('calls', {
+  id: uuid('id').defaultRandom().primaryKey(),
+  callerId: uuid('caller_id').references(() => users.id).notNull(),
+  receiverId: uuid('receiver_id').references(() => users.id).notNull(),
+  callType: text('call_type').notNull(),
+  status: text('status').default('pending'),
+  startTime: timestamp('start_time'),
+  endTime: timestamp('end_time'),
+  duration: integer('duration'),
+  createdAt: timestamp('created_at').defaultNow(),
+});
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = typeof users.$inferInsert;
 export type Message = typeof messages.$inferSelect;
+export type PushSubscription = typeof pushSubscriptions.$inferSelect;
+export type Notification = typeof notifications.$inferSelect;
+export type Call = typeof calls.$inferSelect;
