@@ -4,9 +4,15 @@ import Sidebar from './components/layout/Sidebar';
 import ProfileCard from './components/features/ProfileCard';
 import FilterBar from './components/features/FilterBar';
 import LoginModal from './components/features/LoginModal';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsConditions from './pages/TermsConditions';
+import AboutUs from './pages/AboutUs';
 import { api } from './lib/api';
 
+type PageType = 'home' | 'privacy' | 'terms' | 'about';
+
 function App() {
+  const [currentPage, setCurrentPage] = useState<PageType>('home');
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [showLoginModal, setShowLoginModal] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -152,6 +158,18 @@ function App() {
 
   const filteredUsers = getFilteredUsers();
 
+  if (currentPage === 'privacy') {
+    return <PrivacyPolicy onBack={() => setCurrentPage('home')} />;
+  }
+
+  if (currentPage === 'terms') {
+    return <TermsConditions onBack={() => setCurrentPage('home')} />;
+  }
+
+  if (currentPage === 'about') {
+    return <AboutUs onBack={() => setCurrentPage('home')} />;
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header
@@ -235,6 +253,57 @@ function App() {
                 WhatsApp/Video calls require payment. Phone number sharing in chat is prohibited.
               </div>
             </div>
+
+            <footer className="mt-12 pt-8 border-t border-border">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">About PrivateConnect</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Sri Lanka's premier verified classified ads platform. All profiles are admin-verified for your safety and trust.
+                  </p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Quick Links</h3>
+                  <ul className="space-y-2 text-sm">
+                    <li>
+                      <button 
+                        onClick={() => setCurrentPage('about')} 
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        About Us
+                      </button>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => setCurrentPage('privacy')} 
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        Privacy Policy
+                      </button>
+                    </li>
+                    <li>
+                      <button 
+                        onClick={() => setCurrentPage('terms')} 
+                        className="text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        Terms & Conditions
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-3">Contact</h3>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li>Email: support@privateconnect.lk</li>
+                    <li>Website: www.privateconnect.lk</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="text-center text-sm text-muted-foreground py-4 border-t border-border">
+                <p>&copy; 2026 PrivateConnect. All rights reserved.</p>
+                <p className="mt-1">18+ Adults Only Platform</p>
+              </div>
+            </footer>
           </div>
         </main>
       </div>
