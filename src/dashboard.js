@@ -76,7 +76,12 @@ async function displayUserInfo() {
     document.getElementById('priceSettingSection').classList.remove('hidden');
 
     if (currentUser.whatsappUnlockPrice) {
-      document.getElementById('whatsappPriceInput').value = currentUser.whatsappUnlockPrice;
+      const priceField = document.getElementById('whatsappUnlockPrice');
+      if (priceField) priceField.value = currentUser.whatsappUnlockPrice;
+    }
+    if (currentUser.whatsappNumber) {
+      const numberField = document.getElementById('whatsappNumber');
+      if (numberField) numberField.value = currentUser.whatsappNumber;
     }
   } else if (priceStatus === 'pending') {
     document.getElementById('priceActivationStatus').textContent = 'Pending Approval';
@@ -179,11 +184,16 @@ document.getElementById('btnSubmitActivation')?.addEventListener('click', async 
 });
 
 document.getElementById('btnSavePrices')?.addEventListener('click', async function() {
-  const whatsappPrice = document.getElementById('whatsappPriceInput')?.value;
-  const whatsappNumber = document.getElementById('whatsappNumberInput')?.value;
+  const whatsappPrice = document.getElementById('whatsappUnlockPrice')?.value;
+  const whatsappNum = document.getElementById('whatsappNumber')?.value;
 
-  if (!whatsappPrice) {
-    alert('Please set a WhatsApp unlock price');
+  if (!whatsappPrice || parseInt(whatsappPrice) < 100) {
+    alert('Please set a WhatsApp unlock price (minimum Rs.100)');
+    return;
+  }
+
+  if (!whatsappNum) {
+    alert('Please enter your WhatsApp number');
     return;
   }
 
@@ -192,10 +202,10 @@ document.getElementById('btnSavePrices')?.addEventListener('click', async functi
       method: 'PUT',
       body: JSON.stringify({ 
         whatsappUnlockPrice: parseInt(whatsappPrice),
-        whatsappNumber: whatsappNumber || null,
+        whatsappNumber: whatsappNum,
       }),
     });
-    alert('Prices saved successfully!');
+    alert('Settings saved successfully!');
   } catch (error) {
     alert('Failed: ' + error.message);
   }

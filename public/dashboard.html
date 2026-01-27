@@ -143,13 +143,24 @@
               <input id="voicePriceInput" type="number" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 1000">
             </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700">Video Call Price (Rs.)</label>
-              <input id="videoPriceInput" type="number" min="0" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 2000">
+            <div class="pt-4 border-t mt-4">
+              <h3 class="font-semibold text-gray-800 mb-3">📱 WhatsApp Settings</h3>
+              <p class="text-xs text-gray-500 mb-3">Users will pay this amount to unlock your WhatsApp number for 24-hour video call access.</p>
+              
+              <div class="mb-3">
+                <label class="block text-sm font-medium text-gray-700">WhatsApp Number *</label>
+                <input id="whatsappNumber" type="tel" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., +94771234567">
+              </div>
+              
+              <div>
+                <label class="block text-sm font-medium text-gray-700">WhatsApp Unlock Price (Rs.) *</label>
+                <input id="whatsappUnlockPrice" type="number" min="100" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md" placeholder="e.g., 500">
+                <p class="text-xs text-gray-500 mt-1">Minimum Rs.100. This is your daily rate for WhatsApp access.</p>
+              </div>
             </div>
 
-            <button id="btnSavePrices" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
-              Save Prices
+            <button id="btnSavePrices" class="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 mt-4">
+              Save All Settings
             </button>
           </div>
         </div>

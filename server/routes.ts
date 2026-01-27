@@ -463,14 +463,17 @@ export function registerRoutes(app: Express) {
 
   app.put('/api/admin/whatsapp-unlocks/:id/approve', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
     try {
-      const { sellerId, amount } = req.body;
       const expiryDate = new Date();
       expiryDate.setDate(expiryDate.getDate() + 1); // 1 day access
       
       const unlock = await storage.approveWhatsappUnlock(req.params.id as string, expiryDate);
       
-      // Add amount to seller's wallet
-      await storage.addWalletTransaction(sellerId, 'whatsapp_unlock', amount, 'WhatsApp unlock payment received');
+      if (!unlock) {
+        return res.status(404).json({ error: 'Unlock request not found' });
+      }
+      
+      // Use sellerId and amount from the unlock record (not from client) for security
+      await storage.addWalletTransaction(unlock.sellerId, 'whatsapp_unlock', unlock.amount, 'WhatsApp unlock payment received');
       
       res.json({ success: true, unlock });
     } catch (error: any) {

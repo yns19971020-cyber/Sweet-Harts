@@ -48,9 +48,90 @@ async function init() {
     const { profile } = await apiRequest(`/api/profiles/${userId}`);
     profileUser = profile;
     displayProfile();
+    setupWhatsappUnlock();
   } catch (error) {
     alert('Profile not found');
     window.location.href = '/';
+  }
+}
+
+async function setupWhatsappUnlock() {
+  const whatsappUnlocked = document.getElementById('whatsappUnlocked');
+  const whatsappLocked = document.getElementById('whatsappLocked');
+  const loginRequired = document.getElementById('loginRequired');
+  const unlockPrice = document.getElementById('unlockPrice');
+  
+  if (!profileUser.whatsappUnlockPrice) {
+    whatsappLocked.innerHTML = '<p class="text-gray-500 text-center py-4">This seller has not set a WhatsApp unlock price yet.</p>';
+    return;
+  }
+  
+  unlockPrice.textContent = 'Rs. ' + profileUser.whatsappUnlockPrice;
+  
+  if (!currentUser) {
+    whatsappLocked.classList.add('hidden');
+    loginRequired.classList.remove('hidden');
+    return;
+  }
+  
+  try {
+    const { hasAccess, whatsappNumber } = await apiRequest(`/api/whatsapp-unlock/check/${userId}`);
+    
+    if (hasAccess && whatsappNumber) {
+      whatsappLocked.classList.add('hidden');
+      whatsappUnlocked.classList.remove('hidden');
+      document.getElementById('whatsappNumber').textContent = whatsappNumber;
+    } else {
+      whatsappUnlocked.classList.add('hidden');
+      whatsappLocked.classList.remove('hidden');
+    }
+  } catch (error) {
+    console.error('Failed to check WhatsApp access:', error);
+  }
+  
+  document.getElementById('btnUnlockWhatsapp').addEventListener('click', handleUnlockWhatsapp);
+}
+
+async function handleUnlockWhatsapp() {
+  const paymentMethod = document.getElementById('paymentMethod').value;
+  const transactionRef = document.getElementById('transactionRef').value;
+  const paymentProofFile = document.getElementById('paymentProof').files[0];
+  
+  if (!paymentMethod) {
+    alert('Please select a payment method');
+    return;
+  }
+  
+  if (!transactionRef) {
+    alert('Please enter transaction reference');
+    return;
+  }
+  
+  let paymentProof = null;
+  if (paymentProofFile) {
+    paymentProof = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsDataURL(paymentProofFile);
+    });
+  }
+  
+  try {
+    await apiRequest('/api/whatsapp-unlock', {
+      method: 'POST',
+      body: JSON.stringify({
+        sellerId: userId,
+        paymentMethod,
+        transactionRef,
+        paymentProof,
+      }),
+    });
+    
+    alert('Payment submitted! Admin will review and approve your access.');
+    document.getElementById('unlockForm').classList.add('hidden');
+    document.getElementById('pendingMessage').classList.remove('hidden');
+  } catch (error) {
+    alert('Error: ' + error.message);
   }
 }
 
