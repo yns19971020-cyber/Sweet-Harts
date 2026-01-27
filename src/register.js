@@ -262,28 +262,66 @@ function renderBankDetails(container, bankDetails) {
   container.appendChild(branchP);
 }
 
+let paymentSlipData = '';
+
+const paymentDetailsSection = document.getElementById('paymentDetails');
+const bankDetailsDiv = document.getElementById('bankDetails');
+const paymentSlipUpload = document.getElementById('paymentSlipUpload');
+const paymentSlipPreview = document.getElementById('paymentSlipPreview');
+
+if (paymentSlipUpload) {
+  paymentSlipUpload.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Slip image too large. Maximum 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      paymentSlipData = event.target.result;
+      if (paymentSlipPreview) {
+        paymentSlipPreview.src = paymentSlipData;
+        paymentSlipPreview.classList.remove('hidden');
+      }
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 paymentMethodSelect.addEventListener('change', async function() {
   const method = this.value;
   
-  if (method === 'sampath_bank') {
-    bankDetailsSection.classList.remove('hidden');
-    const response = await fetch('/api/bank-details?bank=sampath');
-    const bankDetails = await response.json();
-    renderBankDetails(bankDetailsContent, bankDetails);
-  } else if (method === 'commercial_bank') {
-    bankDetailsSection.classList.remove('hidden');
-    const response = await fetch('/api/bank-details?bank=commercial');
-    const bankDetails = await response.json();
-    renderBankDetails(bankDetailsContent, bankDetails);
-  } else if (method === 'binance') {
-    bankDetailsSection.classList.remove('hidden');
-    bankDetailsContent.innerHTML = `
-      <p><strong>Binance USDT (TRC20)</strong></p>
-      <p>Wallet: TRC20 network address will be provided</p>
-      <p>After payment, enter your TXID as reference</p>
-    `;
+  if (method && method !== 'online') {
+    paymentDetailsSection.classList.remove('hidden');
+    
+    if (method === 'bank_sampath') {
+      bankDetailsDiv.innerHTML = `
+        <p><strong>Sampath Bank</strong></p>
+        <p>Account: 105057458082</p>
+        <p>Name: J A Y S Kavinda</p>
+        <p>Branch: Kalutara</p>
+      `;
+    } else if (method === 'bank_commercial') {
+      bankDetailsDiv.innerHTML = `
+        <p><strong>Commercial Bank</strong></p>
+        <p>Account: 8007739640</p>
+        <p>Name: J A Y S Kavinda</p>
+        <p>Branch: Kalutara</p>
+      `;
+    } else if (method === 'binance') {
+      bankDetailsDiv.innerHTML = `
+        <p><strong>Binance USDT (TRC20)</strong></p>
+        <p>Wallet: TRC20 network address will be provided</p>
+        <p>After payment, enter your TXID as reference</p>
+      `;
+    }
+  } else if (method === 'online') {
+    paymentDetailsSection.classList.add('hidden');
   } else {
-    bankDetailsSection.classList.add('hidden');
+    paymentDetailsSection.classList.add('hidden');
   }
 });
 
@@ -332,8 +370,13 @@ document.getElementById('registerForm').addEventListener('submit', async functio
     return;
   }
 
-  if (!transactionRef) {
+  if (paymentMethod !== 'online' && !transactionRef) {
     alert('කරුණාකර transaction reference අංකය ඇතුළත් කරන්න. (Please enter transaction reference.)');
+    return;
+  }
+
+  if (paymentMethod !== 'online' && !paymentSlipData) {
+    alert('කරුණාකර payment slip/screenshot upload කරන්න. (Please upload payment slip.)');
     return;
   }
 
@@ -359,6 +402,9 @@ document.getElementById('registerForm').addEventListener('submit', async functio
         location,
         profileImage: selfieData,
         subscriptionPlan: selectedPlan.value,
+        paymentMethod,
+        transactionRef,
+        paymentProof: paymentSlipData,
       }),
     });
 

@@ -178,6 +178,32 @@ export class Storage {
     return unlock;
   }
 
+  async createSubscriptionPayment(data: { userId: string; plan: string; amount: number; paymentMethod?: string; transactionRef?: string; paymentProof?: string; status?: string }) {
+    const [payment] = await db.insert(subscriptionPayments).values(data).returning();
+    return payment;
+  }
+
+  async getSubscriptionPayments(userId?: string) {
+    if (userId) {
+      return await db.select().from(subscriptionPayments)
+        .where(eq(subscriptionPayments.userId, userId))
+        .orderBy(desc(subscriptionPayments.createdAt));
+    }
+    return await db.select().from(subscriptionPayments)
+      .orderBy(desc(subscriptionPayments.createdAt));
+  }
+
+  async getPendingSubscriptionPayments() {
+    return await db.select().from(subscriptionPayments)
+      .where(eq(subscriptionPayments.status, 'pending'))
+      .orderBy(desc(subscriptionPayments.createdAt));
+  }
+
+  async approveSubscriptionPayment(paymentId: string, userId: string, expiryDate: Date) {
+    await db.update(subscriptionPayments).set({ status: 'approved' }).where(eq(subscriptionPayments.id, paymentId));
+    await this.updateUser(userId, { subscriptionStatus: 'active', subscriptionExpiryDate: expiryDate, verified: true });
+  }
+
   async createPriceActivationRequest(data: { userId: string; paymentMethod?: string; transactionRef?: string; paymentProof?: string }) {
     const [request] = await db.insert(priceActivationRequests).values(data).returning();
     await this.updateUser(data.userId, { priceActivationStatus: 'pending' });

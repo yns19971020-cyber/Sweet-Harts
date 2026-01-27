@@ -37,7 +37,7 @@ export function adminMiddleware(req: AuthRequest, res: Response, next: any) {
 export function registerRoutes(app: Express) {
   app.post('/api/auth/register', async (req, res) => {
     try {
-      const { username, email, password, gender, category, location, profileImage, subscriptionPlan } = req.body;
+      const { username, email, password, gender, category, location, profileImage, subscriptionPlan, paymentMethod, transactionRef, paymentProof } = req.body;
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
@@ -92,6 +92,27 @@ export function registerRoutes(app: Express) {
           });
           console.log('Fake photo alert sent to admin for user:', username);
         }
+      }
+
+      if (paymentMethod && transactionRef) {
+        const planPrices: Record<string, number> = {
+          '1month': 25,
+          '3months': 50,
+          '6months': 75,
+          '12months': 100,
+        };
+        const amount = planPrices[subscriptionPlan] || 25;
+        
+        await storage.createSubscriptionPayment({
+          userId: user.id,
+          plan: subscriptionPlan,
+          amount: amount * 100,
+          paymentMethod,
+          transactionRef,
+          paymentProof,
+          status: 'pending',
+        });
+        console.log('Subscription payment created for user:', username);
       }
 
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
@@ -334,6 +355,41 @@ export function registerRoutes(app: Express) {
       });
       
       res.json({ user: { ...user, password: undefined } });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/admin/subscription-payments', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const payments = await storage.getPendingSubscriptionPayments();
+      const paymentsWithUsers = await Promise.all(
+        payments.map(async (p: any) => {
+          const user = await storage.getUserById(p.userId);
+          return { ...p, user: user ? { ...user, password: undefined } : null };
+        })
+      );
+      res.json({ payments: paymentsWithUsers });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.put('/api/admin/subscription-payments/:id/approve', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { userId, plan } = req.body;
+      const planDurations: Record<string, number> = {
+        '1month': 30,
+        '3months': 90,
+        '6months': 180,
+        '12months': 365,
+      };
+      const days = planDurations[plan] || 30;
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + days);
+      
+      await storage.approveSubscriptionPayment(req.params.id as string, userId, expiryDate);
+      res.json({ success: true });
     } catch (error: any) {
       res.status(500).json({ error: error.message });
     }

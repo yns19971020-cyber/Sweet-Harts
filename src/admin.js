@@ -75,11 +75,20 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const messagesSection = document.getElementById('messagesSection');
     const usersTable = document.querySelector('.bg-white.rounded-lg.shadow-lg.overflow-hidden');
     
-    if (currentFilter === 'messages') {
+    const paymentsSection = document.getElementById('paymentsSection');
+    
+    if (currentFilter === 'payments') {
+      paymentsSection.classList.remove('hidden');
+      messagesSection.classList.add('hidden');
+      usersTable.classList.add('hidden');
+      loadPayments();
+    } else if (currentFilter === 'messages') {
+      paymentsSection.classList.add('hidden');
       messagesSection.classList.remove('hidden');
       usersTable.classList.add('hidden');
       loadMessages();
     } else {
+      paymentsSection.classList.add('hidden');
       messagesSection.classList.add('hidden');
       usersTable.classList.remove('hidden');
       renderUsers();
@@ -379,5 +388,96 @@ window.sendReply = async function(userId) {
     alert('Reply sent!');
   } catch (error) {
     alert('Failed to send reply: ' + error.message);
+  }
+};
+
+async function loadPayments() {
+  try {
+    const { payments } = await apiRequest('/api/admin/subscription-payments');
+    const paymentsList = document.getElementById('paymentsList');
+    
+    if (!payments || payments.length === 0) {
+      paymentsList.innerHTML = '<p class="text-gray-500 text-center py-4">No pending payments</p>';
+      return;
+    }
+
+    const badge = document.getElementById('paymentsBadge');
+    if (badge) {
+      badge.textContent = payments.length;
+      badge.classList.remove('hidden');
+    }
+
+    let html = '';
+    for (const payment of payments) {
+      const user = payment.user;
+      const safeProfileImage = user?.profileImage && !user.profileImage.toLowerCase().startsWith('javascript:') ? escapeHtml(user.profileImage) : 'https://via.placeholder.com/60';
+      const safeUserName = escapeHtml(user?.username || 'Unknown');
+      const safeEmail = escapeHtml(user?.email || '');
+      const safePaymentProof = payment.paymentProof && !payment.paymentProof.toLowerCase().startsWith('javascript:') ? escapeHtml(payment.paymentProof) : '';
+      
+      html += `
+        <div class="border rounded-lg p-4 bg-gray-50">
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex-shrink-0">
+              <img src="${safeProfileImage}" alt="${safeUserName}" class="w-20 h-20 rounded-lg object-cover border">
+            </div>
+            <div class="flex-1">
+              <h3 class="font-bold text-lg">${safeUserName}</h3>
+              <p class="text-sm text-gray-500">${safeEmail}</p>
+              <div class="mt-2 grid grid-cols-2 gap-2 text-sm">
+                <div><span class="font-medium">Plan:</span> ${escapeHtml(payment.plan)}</div>
+                <div><span class="font-medium">Amount:</span> $${(payment.amount / 100).toFixed(2)}</div>
+                <div><span class="font-medium">Method:</span> ${escapeHtml(payment.paymentMethod || 'N/A')}</div>
+                <div><span class="font-medium">Ref:</span> ${escapeHtml(payment.transactionRef || 'N/A')}</div>
+              </div>
+            </div>
+            ${safePaymentProof ? `
+              <div class="flex-shrink-0">
+                <p class="text-xs font-medium mb-1">Payment Slip:</p>
+                <img src="${safePaymentProof}" class="max-h-32 rounded border cursor-pointer hover:opacity-80" onclick="window.open('${safePaymentProof}', '_blank')" alt="Payment proof">
+              </div>
+            ` : '<div class="text-sm text-gray-400">No slip uploaded</div>'}
+          </div>
+          <div class="mt-4 flex gap-2">
+            <button onclick="approvePayment('${escapeHtml(payment.id)}', '${escapeHtml(payment.userId)}', '${escapeHtml(payment.plan)}')" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700">
+              ✓ Approve & Activate
+            </button>
+            <button onclick="rejectPayment('${escapeHtml(payment.id)}')" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700">
+              ✗ Reject
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    if (typeof DOMPurify === 'undefined') {
+      paymentsList.textContent = 'Unable to load payments securely.';
+      return;
+    }
+    paymentsList.innerHTML = DOMPurify.sanitize(html);
+  } catch (error) {
+    console.error('Failed to load payments:', error);
+    document.getElementById('paymentsList').innerHTML = '<p class="text-red-500 text-center py-4">Failed to load payments</p>';
+  }
+}
+
+window.approvePayment = async function(paymentId, userId, plan) {
+  if (confirm('Approve this payment and activate subscription?')) {
+    try {
+      await apiRequest(`/api/admin/subscription-payments/${paymentId}/approve`, {
+        method: 'PUT',
+        body: JSON.stringify({ userId, plan }),
+      });
+      alert('Payment approved! User subscription activated.');
+      loadPayments();
+    } catch (error) {
+      alert('Failed: ' + error.message);
+    }
+  }
+};
+
+window.rejectPayment = async function(paymentId) {
+  if (confirm('Reject this payment?')) {
+    alert('Payment rejection feature coming soon. Please contact user directly.');
   }
 };

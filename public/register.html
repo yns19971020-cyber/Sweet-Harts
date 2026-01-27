@@ -221,6 +221,12 @@
               <label class="block text-sm font-medium mb-1">ගනුදෙනු අංකය / TXID *</label>
               <input type="text" id="transactionRef" class="w-full px-3 py-2 border rounded-md" placeholder="Enter Transaction ID">
             </div>
+            <div class="mt-3">
+              <label class="block text-sm font-medium mb-1">📎 Payment Slip / Screenshot (අනිවාර්යයි)</label>
+              <input type="file" id="paymentSlipUpload" accept="image/*" class="w-full px-3 py-2 border rounded-md bg-white">
+              <p class="text-xs text-gray-500 mt-1">Bank slip/screenshot upload කරන්න</p>
+              <img id="paymentSlipPreview" class="hidden mt-2 max-h-40 rounded border" alt="Payment slip preview">
+            </div>
           </div>
 
           <!-- Age Confirmation -->
