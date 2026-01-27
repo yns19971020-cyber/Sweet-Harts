@@ -145,10 +145,10 @@
                 </button>
                 
                 <div class="relative">
-                  <input type="file" id="fileUpload" accept="image/*" capture="user" class="hidden">
-                  <button type="button" id="btnUploadPhoto" class="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-semibold">
+                  <input type="file" id="fileUpload" accept="image/*" class="hidden" onchange="handleFileSelect(event)">
+                  <label for="fileUpload" id="btnUploadPhoto" class="w-full px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 font-semibold cursor-pointer block text-center">
                     📤 Photo Upload කරන්න (Upload Selfie)
-                  </button>
+                  </label>
                 </div>
                 
                 <button type="button" id="btnRetake" class="w-full px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 font-semibold hidden">

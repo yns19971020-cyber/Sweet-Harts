@@ -190,45 +190,49 @@ const fileUpload = document.getElementById('fileUpload');
 const btnUploadPhoto = document.getElementById('btnUploadPhoto');
 const uploadedPhoto = document.getElementById('uploadedPhoto');
 
-if (btnUploadPhoto && fileUpload) {
-  btnUploadPhoto.addEventListener('click', function() {
-    fileUpload.click();
-  });
+console.log('=== UPLOAD BUTTON DEBUG ===');
+console.log('btnUploadPhoto element:', btnUploadPhoto);
+console.log('fileUpload element:', fileUpload);
 
-  fileUpload.addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
+window.handleFileSelect = function(e) {
+  console.log('File selected via handleFileSelect');
+  const file = e.target.files[0];
+  if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file.\nකරුණාකර image file එකක් තෝරන්න.');
-      return;
+  if (!file.type.startsWith('image/')) {
+    alert('Please select an image file.\nකරුණාකර image file එකක් තෝරන්න.');
+    return;
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    alert('Image too large. Maximum 5MB allowed.\nImage එක ලොකු වැඩි. Maximum 5MB.');
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    selfieData = event.target.result;
+    selfieDataInput.value = selfieData;
+
+    if (uploadedPhoto) {
+      uploadedPhoto.src = selfieData;
+      uploadedPhoto.classList.remove('hidden');
     }
+    
+    cameraPlaceholder.classList.add('hidden');
+    capturedPhoto.classList.add('hidden');
+    btnOpenCamera.classList.add('hidden');
+    if (btnUploadPhoto) btnUploadPhoto.classList.add('hidden');
+    btnRetake.classList.remove('hidden');
 
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image too large. Maximum 5MB allowed.\nImage එක ලොකු වැඩි. Maximum 5MB.');
-      return;
-    }
+    console.log('Photo uploaded, size:', Math.round(selfieData.length / 1024), 'KB');
+  };
+  reader.readAsDataURL(file);
+};
 
-    const reader = new FileReader();
-    reader.onload = function(event) {
-      selfieData = event.target.result;
-      selfieDataInput.value = selfieData;
-
-      if (uploadedPhoto) {
-        uploadedPhoto.src = selfieData;
-        uploadedPhoto.classList.remove('hidden');
-      }
-      
-      cameraPlaceholder.classList.add('hidden');
-      capturedPhoto.classList.add('hidden');
-      btnOpenCamera.classList.add('hidden');
-      btnUploadPhoto.classList.add('hidden');
-      btnRetake.classList.remove('hidden');
-
-      console.log('Photo uploaded, size:', Math.round(selfieData.length / 1024), 'KB');
-    };
-    reader.readAsDataURL(file);
-  });
+if (fileUpload) {
+  console.log('File upload input found, adding change listener');
+  fileUpload.addEventListener('change', window.handleFileSelect);
 }
 
 const paymentMethodSelect = document.getElementById('paymentMethod');
