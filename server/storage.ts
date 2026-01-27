@@ -178,7 +178,7 @@ export class Storage {
       .orderBy(desc(walletTransactions.createdAt));
   }
 
-  async createWhatsappUnlock(data: { buyerId: string; sellerId: string; amount: number; paymentMethod?: string; transactionRef?: string; stripePaymentIntentId?: string }) {
+  async createWhatsappUnlock(data: { buyerId: string; sellerId: string; amount: number; paymentMethod?: string; transactionRef?: string; paymentProof?: string; stripePaymentIntentId?: string; expiresAt?: Date }) {
     const [unlock] = await db.insert(whatsappUnlocks).values(data).returning();
     return unlock;
   }
@@ -189,12 +189,35 @@ export class Storage {
       .orderBy(desc(whatsappUnlocks.createdAt));
   }
 
-  async approveWhatsappUnlock(unlockId: string) {
+  async approveWhatsappUnlock(unlockId: string, expiryDate: Date) {
     const [unlock] = await db.update(whatsappUnlocks)
-      .set({ status: 'approved' })
+      .set({ status: 'approved', expiresAt: expiryDate })
       .where(eq(whatsappUnlocks.id, unlockId))
       .returning();
     return unlock;
+  }
+
+  async hasActiveWhatsappAccess(buyerId: string, sellerId: string): Promise<boolean> {
+    const now = new Date();
+    const result = await db.select().from(whatsappUnlocks)
+      .where(and(
+        eq(whatsappUnlocks.buyerId, buyerId),
+        eq(whatsappUnlocks.sellerId, sellerId),
+        eq(whatsappUnlocks.status, 'approved')
+      ));
+    
+    for (const unlock of result) {
+      if (unlock.expiresAt && new Date(unlock.expiresAt) > now) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async getPendingWhatsappUnlocks() {
+    return await db.select().from(whatsappUnlocks)
+      .where(eq(whatsappUnlocks.status, 'pending'))
+      .orderBy(desc(whatsappUnlocks.createdAt));
   }
 
   async createSubscriptionPayment(data: { userId: string; plan: string; amount: number; paymentMethod?: string; transactionRef?: string; paymentProof?: string; status?: string }) {
