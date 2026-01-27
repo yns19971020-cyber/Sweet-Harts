@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 import Header from './components/layout/Header';
 import Sidebar from './components/layout/Sidebar';
 import ProfileCard from './components/features/ProfileCard';
@@ -331,6 +332,7 @@ function App() {
       )}
 
       <ChatBot />
+      <Analytics />
       </div>
     </div>
   );

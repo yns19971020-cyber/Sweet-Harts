@@ -60,6 +60,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/pg": "^8.16.0",
     "@types/ws": "^8.18.1",
+    "@vercel/analytics": "^1.6.1",
     "axios": "^1.12.2",
     "bcryptjs": "^3.0.3",
     "chart.js": "^4.5.0",
