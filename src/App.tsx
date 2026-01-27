@@ -4,6 +4,7 @@ import Sidebar from './components/layout/Sidebar';
 import ProfileCard from './components/features/ProfileCard';
 import FilterBar from './components/features/FilterBar';
 import LoginModal from './components/features/LoginModal';
+import ChatBot from './components/features/ChatBot';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsConditions from './pages/TermsConditions';
 import AboutUs from './pages/AboutUs';
@@ -328,6 +329,8 @@ function App() {
           onLogin={handleLogin}
         />
       )}
+
+      <ChatBot />
       </div>
     </div>
   );
