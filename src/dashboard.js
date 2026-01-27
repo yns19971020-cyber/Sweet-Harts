@@ -25,9 +25,13 @@ init();
 async function init() {
   try {
     const { user } = await apiRequest('/api/auth/me');
-    if (!user || user.role === 'admin') {
-      alert('Please login as a user');
+    if (!user) {
+      alert('Please login first');
       window.location.href = '/';
+      return;
+    }
+    if (user.role === 'admin') {
+      window.location.href = '/admin.html';
       return;
     }
     currentUser = user;
