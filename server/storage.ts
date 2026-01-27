@@ -130,10 +130,29 @@ export class Storage {
     limit?: number;
     offset?: number;
   } = {}): Promise<User[]> {
-    return this.listUsers({
-      ...options,
-      role: 'user',
-    });
+    const { category, location, verified, featured, search, limit = 50, offset = 0 } = options;
+    
+    let query = db.select().from(users);
+    const conditions = [];
+    
+    conditions.push(or(eq(users.role, 'user'), eq(users.role, 'seller')));
+    
+    if (verified !== undefined) conditions.push(eq(users.verified, verified));
+    if (category) conditions.push(eq(users.category, category));
+    if (location) conditions.push(eq(users.location, location));
+    if (featured !== undefined) conditions.push(eq(users.featured, featured));
+    if (search) {
+      conditions.push(or(
+        ilike(users.username, `%${search}%`),
+        ilike(users.email, `%${search}%`)
+      ));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return await query.orderBy(desc(users.createdAt)).limit(limit).offset(offset);
   }
 
   async addWalletTransaction(userId: string, type: string, amount: number, description?: string) {
