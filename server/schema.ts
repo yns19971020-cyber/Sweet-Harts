@@ -28,6 +28,8 @@ export const users = pgTable('users', {
   featuredExpiry: timestamp('featured_expiry'),
   priceActivationStatus: text('price_activation_status').default('none'),
   canSetPrice: boolean('can_set_price').default(false),
+  photoSuspicious: boolean('photo_suspicious').default(false),
+  photoVerificationNotes: text('photo_verification_notes'),
   createdAt: timestamp('created_at').defaultNow(),
   updatedAt: timestamp('updated_at').defaultNow(),
 });

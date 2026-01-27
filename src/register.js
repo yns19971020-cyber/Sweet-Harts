@@ -177,10 +177,59 @@ btnRetake.addEventListener('click', function() {
   selfieData = '';
   selfieDataInput.value = '';
   capturedPhoto.classList.add('hidden');
+  const uploadedPhoto = document.getElementById('uploadedPhoto');
+  if (uploadedPhoto) uploadedPhoto.classList.add('hidden');
   btnRetake.classList.add('hidden');
   btnOpenCamera.classList.remove('hidden');
+  const btnUploadPhoto = document.getElementById('btnUploadPhoto');
+  if (btnUploadPhoto) btnUploadPhoto.classList.remove('hidden');
   cameraPlaceholder.classList.remove('hidden');
 });
+
+const fileUpload = document.getElementById('fileUpload');
+const btnUploadPhoto = document.getElementById('btnUploadPhoto');
+const uploadedPhoto = document.getElementById('uploadedPhoto');
+
+if (btnUploadPhoto && fileUpload) {
+  btnUploadPhoto.addEventListener('click', function() {
+    fileUpload.click();
+  });
+
+  fileUpload.addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.\nකරුණාකර image file එකක් තෝරන්න.');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image too large. Maximum 5MB allowed.\nImage එක ලොකු වැඩි. Maximum 5MB.');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      selfieData = event.target.result;
+      selfieDataInput.value = selfieData;
+
+      if (uploadedPhoto) {
+        uploadedPhoto.src = selfieData;
+        uploadedPhoto.classList.remove('hidden');
+      }
+      
+      cameraPlaceholder.classList.add('hidden');
+      capturedPhoto.classList.add('hidden');
+      btnOpenCamera.classList.add('hidden');
+      btnUploadPhoto.classList.add('hidden');
+      btnRetake.classList.remove('hidden');
+
+      console.log('Photo uploaded, size:', Math.round(selfieData.length / 1024), 'KB');
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 const paymentMethodSelect = document.getElementById('paymentMethod');
 const bankDetailsSection = document.getElementById('bankDetailsSection');

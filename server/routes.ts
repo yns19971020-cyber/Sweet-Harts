@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { storage } from './storage';
 import { saveSubscription, removeSubscription, sendMessageNotification, getVapidPublicKey } from './pushService';
+import { verifyPhoto } from './photoVerification';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'privateconnect-secret-key-2024';
 
@@ -50,6 +51,19 @@ export function registerRoutes(app: Express) {
 
       const hashedPassword = await bcrypt.hash(password, 10);
 
+      let photoVerificationResult = null;
+      let photoSuspicious = false;
+      
+      if (profileImage) {
+        try {
+          photoVerificationResult = await verifyPhoto(profileImage);
+          photoSuspicious = photoVerificationResult.isSuspicious || photoVerificationResult.recommendation !== 'approve';
+          console.log('Photo verification result:', photoVerificationResult);
+        } catch (err) {
+          console.error('Photo verification failed:', err);
+        }
+      }
+
       const user = await storage.createUser({
         username,
         email,
@@ -61,7 +75,24 @@ export function registerRoutes(app: Express) {
         subscriptionPlan,
         subscriptionStatus: 'pending',
         description: 'Free chat & voice available. Unlock WhatsApp for video calls!',
+        photoSuspicious,
+        photoVerificationNotes: photoVerificationResult ? JSON.stringify(photoVerificationResult) : null,
       });
+
+      if (photoSuspicious && photoVerificationResult) {
+        const admin = await storage.getAdminUser();
+        if (admin) {
+          const alertMessage = `⚠️ FAKE PHOTO ALERT!\n\nUser: ${username}\nEmail: ${email}\n\nAI Detection Results:\n- Suspicious: ${photoVerificationResult.isSuspicious ? 'YES' : 'NO'}\n- Confidence: ${photoVerificationResult.confidence}%\n- Recommendation: ${photoVerificationResult.recommendation.toUpperCase()}\n\nReasons:\n${photoVerificationResult.reasons.map(r => '• ' + r).join('\n')}\n\nPlease review this profile carefully before approving.`;
+          
+          await storage.sendMessage({
+            senderId: user.id,
+            receiverId: admin.id,
+            message: alertMessage,
+            messageType: 'system',
+          });
+          console.log('Fake photo alert sent to admin for user:', username);
+        }
+      }
 
       const token = jwt.sign({ id: user.id, email: user.email, role: user.role }, JWT_SECRET, { expiresIn: '30d' });
 

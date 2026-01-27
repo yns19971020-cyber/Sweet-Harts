@@ -45,6 +45,8 @@ async function initDatabase() {
       featured_expiry TIMESTAMP,
       price_activation_status TEXT DEFAULT 'none',
       can_set_price BOOLEAN DEFAULT FALSE,
+      photo_suspicious BOOLEAN DEFAULT FALSE,
+      photo_verification_notes TEXT,
       created_at TIMESTAMP DEFAULT NOW(),
       updated_at TIMESTAMP DEFAULT NOW()
     )
