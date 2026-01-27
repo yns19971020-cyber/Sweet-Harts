@@ -4,6 +4,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import { registerRoutes } from './routes';
+import { registerChatRoutes } from './replit_integrations/chat';
+import { registerImageRoutes } from './replit_integrations/image';
 import { db } from './db';
 import { sql } from 'drizzle-orm';
 import bcrypt from 'bcryptjs';
@@ -126,6 +128,24 @@ async function initDatabase() {
     )
   `);
 
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS conversations (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
+  await db.execute(sql`
+    CREATE TABLE IF NOT EXISTS chatbot_messages (
+      id SERIAL PRIMARY KEY,
+      conversation_id INTEGER REFERENCES conversations(id) ON DELETE CASCADE NOT NULL,
+      role TEXT NOT NULL,
+      content TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW() NOT NULL
+    )
+  `);
+
   const adminEmail = 'jayakodyarachchigemahisha@gmail.com';
   const existingAdmin = await db.execute(sql`SELECT * FROM users WHERE email = ${adminEmail}`);
   
@@ -157,6 +177,8 @@ if (isProduction) {
 }
 
 registerRoutes(app);
+registerChatRoutes(app);
+registerImageRoutes(app);
 
 app.get('/', (req, res) => {
   if (isProduction) {
