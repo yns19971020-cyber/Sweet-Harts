@@ -79,11 +79,23 @@ console.log('=== END DEBUG INFO ===');
 btnOpenCamera.addEventListener('click', async function() {
   try {
     console.log('Requesting camera access...');
+    console.log('Current protocol:', window.location.protocol);
+    console.log('Is secure context:', window.isSecureContext);
+    
+    if (!window.isSecureContext) {
+      alert('Camera requires HTTPS. Please access the site via HTTPS.\n\nකැමරාවට HTTPS අවශ්‍යයි. කරුණාකර HTTPS හරහා site එකට පිවිසෙන්න.');
+      return;
+    }
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Your browser does not support camera access.\n\nඔබගේ browser එක camera support කරන්නේ නැත.');
+      return;
+    }
     
     const constraints = {
       video: {
-        width: { ideal: 640 },
-        height: { ideal: 480 },
+        width: { ideal: 640, min: 320 },
+        height: { ideal: 480, min: 240 },
         facingMode: 'user'
       },
       audio: false
@@ -104,18 +116,31 @@ btnOpenCamera.addEventListener('click', async function() {
   } catch (err) {
     console.error('Camera error:', err.name, err.message);
     
-    let errorMessage = 'Camera access failed. ';
+    let errorMessage = 'Camera access failed.\nකැමරා ප්‍රවේශය අසාර්ථක විය.\n\n';
     
     if (err.name === 'NotAllowedError') {
-      errorMessage += 'Please allow camera access in your browser settings.';
+      errorMessage += 'Please allow camera access in your browser settings.\nකරුණාකර browser settings වලින් camera access allow කරන්න.';
     } else if (err.name === 'NotFoundError') {
-      errorMessage += 'No camera found on this device.';
+      errorMessage += 'No camera found on this device.\nමෙම device එකේ camera එකක් හමු නොවීය.';
     } else if (err.name === 'NotReadableError') {
-      errorMessage += 'Camera is in use by another application.';
+      errorMessage += 'Camera is in use by another application.\nකැමරාව වෙනත් app එකකින් භාවිතා වෙමින් පවතී.';
     } else if (err.name === 'OverconstrainedError') {
-      errorMessage += 'Camera constraints not satisfied.';
-    } else if (err.name === 'SecurityError') {
-      errorMessage += 'Camera access blocked. HTTPS required.';
+      try {
+        const fallbackConstraints = { video: true, audio: false };
+        videoStream = await navigator.mediaDevices.getUserMedia(fallbackConstraints);
+        videoPreview.srcObject = videoStream;
+        await videoPreview.play();
+        cameraPlaceholder.classList.add('hidden');
+        videoPreview.classList.remove('hidden');
+        btnOpenCamera.classList.add('hidden');
+        btnCapture.classList.remove('hidden');
+        console.log('Camera stream active with fallback constraints');
+        return;
+      } catch (fallbackErr) {
+        errorMessage += 'Camera constraints not supported.\nකැමරා constraints support නැත.';
+      }
+    } else if (err.name === 'SecurityError' || err.name === 'TypeError') {
+      errorMessage += 'Camera access blocked. HTTPS required.\nකැමරා ප්‍රවේශය block කර ඇත. HTTPS අවශ්‍යයි.';
     } else {
       errorMessage += err.message;
     }
