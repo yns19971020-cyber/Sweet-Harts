@@ -51,8 +51,10 @@ export const whatsappUnlocks = pgTable('whatsapp_unlocks', {
   amount: integer('amount').notNull(),
   paymentMethod: text('payment_method'),
   transactionRef: text('transaction_ref'),
+  paymentProof: text('payment_proof'),
   status: text('status').default('pending'),
   stripePaymentIntentId: text('stripe_payment_intent_id'),
+  expiresAt: timestamp('expires_at'),
   createdAt: timestamp('created_at').defaultNow(),
 });
 

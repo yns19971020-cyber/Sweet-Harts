@@ -395,6 +395,92 @@ export function registerRoutes(app: Express) {
     }
   });
 
+  // WhatsApp Unlock endpoints
+  app.post('/api/whatsapp-unlock', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const { sellerId, paymentMethod, transactionRef, paymentProof } = req.body;
+      const seller = await storage.getUserById(sellerId);
+      
+      if (!seller) {
+        return res.status(404).json({ error: 'Seller not found' });
+      }
+      
+      if (!seller.whatsappUnlockPrice) {
+        return res.status(400).json({ error: 'Seller has not set an unlock price' });
+      }
+      
+      // Check if already has active access
+      const hasAccess = await storage.hasActiveWhatsappAccess(req.user.id, sellerId);
+      if (hasAccess) {
+        return res.status(400).json({ error: 'You already have active access to this profile' });
+      }
+      
+      const unlock = await storage.createWhatsappUnlock({
+        buyerId: req.user.id,
+        sellerId,
+        amount: seller.whatsappUnlockPrice,
+        paymentMethod,
+        transactionRef,
+        paymentProof,
+      });
+      
+      res.json({ unlock, message: 'Payment submitted for admin approval' });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/whatsapp-unlock/check/:sellerId', authMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const sellerId = req.params.sellerId as string;
+      const hasAccess = await storage.hasActiveWhatsappAccess(req.user.id, sellerId);
+      const seller = await storage.getUserById(sellerId);
+      res.json({ 
+        hasAccess,
+        whatsappNumber: hasAccess && seller ? seller.whatsappNumber : null,
+        unlockPrice: seller?.whatsappUnlockPrice
+      });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.get('/api/admin/whatsapp-unlocks', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const unlocks = await storage.getPendingWhatsappUnlocks();
+      const unlocksWithUsers = await Promise.all(
+        unlocks.map(async (unlock) => ({
+          ...unlock,
+          buyer: await storage.getUserById(unlock.buyerId),
+          seller: await storage.getUserById(unlock.sellerId),
+        }))
+      );
+      res.json({ unlocks: unlocksWithUsers });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  app.put('/api/admin/whatsapp-unlocks/:id/approve', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
+    try {
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + 1); // 1 day access
+      
+      const unlock = await storage.approveWhatsappUnlock(req.params.id as string, expiryDate);
+      
+      if (!unlock) {
+        return res.status(404).json({ error: 'Unlock request not found' });
+      }
+      
+      // Use sellerId and amount from the unlock record (not from client) for security
+      await storage.addWalletTransaction(unlock.sellerId, 'whatsapp_unlock', unlock.amount, 'WhatsApp unlock payment received');
+      
+      res.json({ success: true, unlock });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   app.get('/api/admin/price-activations', authMiddleware, adminMiddleware, async (req: AuthRequest, res) => {
     try {
       const requests = await storage.getPendingPriceActivations();

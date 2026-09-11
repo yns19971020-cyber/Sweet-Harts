@@ -130,10 +130,29 @@ export class Storage {
     limit?: number;
     offset?: number;
   } = {}): Promise<User[]> {
-    return this.listUsers({
-      ...options,
-      role: 'user',
-    });
+    const { category, location, verified, featured, search, limit = 50, offset = 0 } = options;
+    
+    let query = db.select().from(users);
+    const conditions = [];
+    
+    conditions.push(or(eq(users.role, 'user'), eq(users.role, 'seller')));
+    
+    if (verified !== undefined) conditions.push(eq(users.verified, verified));
+    if (category) conditions.push(eq(users.category, category));
+    if (location) conditions.push(eq(users.location, location));
+    if (featured !== undefined) conditions.push(eq(users.featured, featured));
+    if (search) {
+      conditions.push(or(
+        ilike(users.username, `%${search}%`),
+        ilike(users.email, `%${search}%`)
+      ));
+    }
+    
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions)) as any;
+    }
+    
+    return await query.orderBy(desc(users.createdAt)).limit(limit).offset(offset);
   }
 
   async addWalletTransaction(userId: string, type: string, amount: number, description?: string) {
@@ -159,7 +178,7 @@ export class Storage {
       .orderBy(desc(walletTransactions.createdAt));
   }
 
-  async createWhatsappUnlock(data: { buyerId: string; sellerId: string; amount: number; paymentMethod?: string; transactionRef?: string; stripePaymentIntentId?: string }) {
+  async createWhatsappUnlock(data: { buyerId: string; sellerId: string; amount: number; paymentMethod?: string; transactionRef?: string; paymentProof?: string; stripePaymentIntentId?: string; expiresAt?: Date }) {
     const [unlock] = await db.insert(whatsappUnlocks).values(data).returning();
     return unlock;
   }
@@ -170,12 +189,35 @@ export class Storage {
       .orderBy(desc(whatsappUnlocks.createdAt));
   }
 
-  async approveWhatsappUnlock(unlockId: string) {
+  async approveWhatsappUnlock(unlockId: string, expiryDate: Date) {
     const [unlock] = await db.update(whatsappUnlocks)
-      .set({ status: 'approved' })
+      .set({ status: 'approved', expiresAt: expiryDate })
       .where(eq(whatsappUnlocks.id, unlockId))
       .returning();
     return unlock;
+  }
+
+  async hasActiveWhatsappAccess(buyerId: string, sellerId: string): Promise<boolean> {
+    const now = new Date();
+    const result = await db.select().from(whatsappUnlocks)
+      .where(and(
+        eq(whatsappUnlocks.buyerId, buyerId),
+        eq(whatsappUnlocks.sellerId, sellerId),
+        eq(whatsappUnlocks.status, 'approved')
+      ));
+    
+    for (const unlock of result) {
+      if (unlock.expiresAt && new Date(unlock.expiresAt) > now) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  async getPendingWhatsappUnlocks() {
+    return await db.select().from(whatsappUnlocks)
+      .where(eq(whatsappUnlocks.status, 'pending'))
+      .orderBy(desc(whatsappUnlocks.createdAt));
   }
 
   async createSubscriptionPayment(data: { userId: string; plan: string; amount: number; paymentMethod?: string; transactionRef?: string; paymentProof?: string; status?: string }) {

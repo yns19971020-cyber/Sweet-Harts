@@ -74,22 +74,25 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     
     const messagesSection = document.getElementById('messagesSection');
     const usersTable = document.querySelector('.bg-white.rounded-lg.shadow-lg.overflow-hidden');
-    
     const paymentsSection = document.getElementById('paymentsSection');
+    const whatsappUnlocksSection = document.getElementById('whatsappUnlocksSection');
+    
+    // Hide all sections first
+    paymentsSection.classList.add('hidden');
+    messagesSection.classList.add('hidden');
+    whatsappUnlocksSection.classList.add('hidden');
+    usersTable.classList.add('hidden');
     
     if (currentFilter === 'payments') {
       paymentsSection.classList.remove('hidden');
-      messagesSection.classList.add('hidden');
-      usersTable.classList.add('hidden');
       loadPayments();
+    } else if (currentFilter === 'whatsappUnlocks') {
+      whatsappUnlocksSection.classList.remove('hidden');
+      loadWhatsappUnlocks();
     } else if (currentFilter === 'messages') {
-      paymentsSection.classList.add('hidden');
       messagesSection.classList.remove('hidden');
-      usersTable.classList.add('hidden');
       loadMessages();
     } else {
-      paymentsSection.classList.add('hidden');
-      messagesSection.classList.add('hidden');
       usersTable.classList.remove('hidden');
       renderUsers();
     }
@@ -479,5 +482,104 @@ window.approvePayment = async function(paymentId, userId, plan) {
 window.rejectPayment = async function(paymentId) {
   if (confirm('Reject this payment?')) {
     alert('Payment rejection feature coming soon. Please contact user directly.');
+  }
+};
+
+async function loadWhatsappUnlocks() {
+  try {
+    const { unlocks } = await apiRequest('/api/admin/whatsapp-unlocks');
+    const unlocksList = document.getElementById('whatsappUnlocksList');
+    
+    if (!unlocks || unlocks.length === 0) {
+      unlocksList.innerHTML = '<p class="text-gray-500 text-center py-4">No pending WhatsApp unlock requests</p>';
+      return;
+    }
+
+    const badge = document.getElementById('whatsappBadge');
+    if (badge) {
+      badge.textContent = unlocks.length;
+      badge.classList.remove('hidden');
+    }
+
+    let html = '';
+    for (const unlock of unlocks) {
+      const buyer = unlock.buyer;
+      const seller = unlock.seller;
+      const safeBuyerImage = buyer?.profileImage && !buyer.profileImage.toLowerCase().startsWith('javascript:') ? escapeHtml(buyer.profileImage) : 'https://via.placeholder.com/50';
+      const safeSellerImage = seller?.profileImage && !seller.profileImage.toLowerCase().startsWith('javascript:') ? escapeHtml(seller.profileImage) : 'https://via.placeholder.com/50';
+      const safePaymentProof = unlock.paymentProof && !unlock.paymentProof.toLowerCase().startsWith('javascript:') ? escapeHtml(unlock.paymentProof) : '';
+      
+      html += `
+        <div class="border rounded-lg p-4 bg-purple-50">
+          <div class="flex flex-col md:flex-row gap-4">
+            <div class="flex items-center gap-3">
+              <div class="text-center">
+                <img src="${safeBuyerImage}" alt="${escapeHtml(buyer?.username || 'Buyer')}" class="w-12 h-12 rounded-full object-cover border-2 border-blue-400 mx-auto">
+                <p class="text-xs font-medium mt-1">${escapeHtml(buyer?.username || 'Unknown')}</p>
+                <p class="text-xs text-gray-500">Buyer</p>
+              </div>
+              <span class="text-2xl">→</span>
+              <div class="text-center">
+                <img src="${safeSellerImage}" alt="${escapeHtml(seller?.username || 'Seller')}" class="w-12 h-12 rounded-full object-cover border-2 border-pink-400 mx-auto">
+                <p class="text-xs font-medium mt-1">${escapeHtml(seller?.username || 'Unknown')}</p>
+                <p class="text-xs text-gray-500">Seller</p>
+              </div>
+            </div>
+            <div class="flex-1">
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div><span class="font-medium">Amount:</span> Rs.${unlock.amount}</div>
+                <div><span class="font-medium">Method:</span> ${escapeHtml(unlock.paymentMethod || 'N/A')}</div>
+                <div><span class="font-medium">Ref:</span> ${escapeHtml(unlock.transactionRef || 'N/A')}</div>
+                <div><span class="font-medium">Access:</span> 1 Day</div>
+              </div>
+            </div>
+            ${safePaymentProof ? `
+              <div class="flex-shrink-0">
+                <p class="text-xs font-medium mb-1">Payment Slip:</p>
+                <img src="${safePaymentProof}" class="max-h-24 rounded border cursor-pointer hover:opacity-80" onclick="window.open('${safePaymentProof}', '_blank')" alt="Payment proof">
+              </div>
+            ` : '<div class="text-sm text-gray-400">No slip</div>'}
+          </div>
+          <div class="mt-3 flex gap-2">
+            <button onclick="approveWhatsappUnlock('${escapeHtml(unlock.id)}', ${unlock.amount})" class="px-4 py-2 bg-green-600 text-white rounded-md text-sm hover:bg-green-700">
+              ✓ Approve (1 Day Access)
+            </button>
+            <button onclick="rejectWhatsappUnlock('${escapeHtml(unlock.id)}')" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm hover:bg-red-700">
+              ✗ Reject
+            </button>
+          </div>
+        </div>
+      `;
+    }
+    
+    if (typeof DOMPurify === 'undefined') {
+      unlocksList.textContent = 'Unable to load unlock requests securely.';
+      return;
+    }
+    unlocksList.innerHTML = DOMPurify.sanitize(html);
+  } catch (error) {
+    console.error('Failed to load WhatsApp unlocks:', error);
+    document.getElementById('whatsappUnlocksList').innerHTML = '<p class="text-red-500 text-center py-4">Failed to load unlock requests</p>';
+  }
+}
+
+window.approveWhatsappUnlock = async function(unlockId, amount) {
+  if (confirm('Approve this WhatsApp unlock? User will get 1 day access and seller will receive Rs.' + amount)) {
+    try {
+      await apiRequest(`/api/admin/whatsapp-unlocks/${unlockId}/approve`, {
+        method: 'PUT',
+        body: JSON.stringify({}),
+      });
+      alert('Approved! User now has 1 day access to seller WhatsApp.');
+      loadWhatsappUnlocks();
+    } catch (error) {
+      alert('Failed: ' + error.message);
+    }
+  }
+};
+
+window.rejectWhatsappUnlock = async function(unlockId) {
+  if (confirm('Reject this unlock request?')) {
+    alert('Rejection feature coming soon.');
   }
 };

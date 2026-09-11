@@ -33,6 +33,10 @@
         💳 Payments
         <span id="paymentsBadge" class="hidden ml-1 bg-green-500 text-white text-xs rounded-full px-2">0</span>
       </button>
+      <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="whatsappUnlocks">
+        📱 WhatsApp Unlocks
+        <span id="whatsappBadge" class="hidden ml-1 bg-purple-500 text-white text-xs rounded-full px-2">0</span>
+      </button>
       <button class="tab-btn px-4 py-2 font-medium text-gray-600 hover:text-blue-600" data-filter="messages">
         Messages
         <span id="msgBadge" class="hidden ml-1 bg-red-500 text-white text-xs rounded-full px-2">0</span>
@@ -45,6 +49,17 @@
         <h2 class="text-xl font-bold mb-4">💳 Pending Subscription Payments</h2>
         <div id="paymentsList" class="space-y-4">
           <p class="text-gray-500 text-center py-4">Loading payments...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- WhatsApp Unlocks Section (hidden by default) -->
+    <div id="whatsappUnlocksSection" class="hidden mb-8">
+      <div class="bg-white rounded-lg shadow-lg p-6">
+        <h2 class="text-xl font-bold mb-4">📱 WhatsApp Unlock Requests</h2>
+        <p class="text-sm text-gray-500 mb-4">Users paying to access seller WhatsApp numbers (1 day access)</p>
+        <div id="whatsappUnlocksList" class="space-y-4">
+          <p class="text-gray-500 text-center py-4">Loading unlock requests...</p>
         </div>
       </div>
     </div>

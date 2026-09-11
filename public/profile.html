@@ -76,22 +76,78 @@
         </div>
       </div>
 
-      <!-- Action Buttons -->
-      <div class="p-8">
-        <h2 class="text-xl font-bold mb-4">Contact Options</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <button id="btnChat" class="px-6 py-3 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed" disabled>
-            🔒 Private Chat
+      <!-- Free Contact Options -->
+      <div class="p-8 border-b">
+        <h2 class="text-xl font-bold mb-4">🆓 Free Contact Options</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <button id="btnChat" class="px-6 py-4 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg font-medium hover:from-blue-600 hover:to-blue-700 flex items-center justify-center gap-2">
+            💬 Send Message (Free)
           </button>
-          <button id="btnVoice" class="px-6 py-3 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed" disabled>
-            🔒 Voice Call
-          </button>
-          <button id="btnVideo" class="px-6 py-3 bg-gray-300 text-gray-500 rounded-lg font-medium cursor-not-allowed" disabled>
-            🔒 Video Call
+          <button id="btnVoice" class="px-6 py-4 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-green-700 flex items-center justify-center gap-2">
+            📞 Voice Call (Free)
           </button>
         </div>
-        <div id="lockMessage" class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-          🔒 <strong>Access Restricted:</strong> This profile has not completed verification and price activation. Private features are locked.
+      </div>
+
+      <!-- WhatsApp Unlock Section -->
+      <div class="p-8 bg-gradient-to-r from-pink-50 to-purple-50">
+        <h2 class="text-xl font-bold mb-4">📱 WhatsApp Video Call Access</h2>
+        
+        <div id="whatsappUnlocked" class="hidden">
+          <div class="bg-green-100 border-2 border-green-500 rounded-lg p-6 text-center">
+            <p class="text-green-800 font-bold text-lg mb-2">✅ WhatsApp Unlocked!</p>
+            <p class="text-3xl font-bold text-green-700 mb-2" id="whatsappNumber">Loading...</p>
+            <p class="text-sm text-green-600">Your access is valid for 24 hours</p>
+          </div>
+        </div>
+
+        <div id="whatsappLocked">
+          <div class="bg-white rounded-lg p-6 border-2 border-pink-200">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="font-medium text-gray-700">Unlock WhatsApp for Video Calls</p>
+                <p class="text-sm text-gray-500">Pay once for 24-hour access</p>
+              </div>
+              <div class="text-right">
+                <p class="text-3xl font-bold text-pink-600" id="unlockPrice">Rs. -</p>
+                <p class="text-xs text-gray-500">per day</p>
+              </div>
+            </div>
+            
+            <div id="unlockForm" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Payment Method</label>
+                <select id="paymentMethod" class="w-full px-4 py-2 border rounded-lg">
+                  <option value="">-- Select --</option>
+                  <option value="bank">Bank Transfer</option>
+                  <option value="dialog">Dialog eZ Cash</option>
+                  <option value="mobitel">Mobitel mCash</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Transaction Reference / ID</label>
+                <input type="text" id="transactionRef" placeholder="Enter transaction ID" class="w-full px-4 py-2 border rounded-lg">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Payment Slip (Optional)</label>
+                <input type="file" id="paymentProof" accept="image/*" class="w-full px-4 py-2 border rounded-lg">
+              </div>
+              <button id="btnUnlockWhatsapp" class="w-full px-6 py-4 bg-gradient-to-r from-pink-500 to-purple-500 text-white rounded-lg font-bold text-lg hover:from-pink-600 hover:to-purple-600">
+                🔓 Unlock WhatsApp Now
+              </button>
+            </div>
+
+            <div id="pendingMessage" class="hidden mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
+              <p class="text-yellow-800">⏳ Your payment is pending admin approval</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="loginRequired" class="hidden">
+          <div class="bg-gray-100 rounded-lg p-6 text-center">
+            <p class="text-gray-600 mb-4">Login to unlock WhatsApp access</p>
+            <a href="/" class="px-6 py-3 bg-pink-500 text-white rounded-lg font-medium hover:bg-pink-600">Login / Register</a>
+          </div>
         </div>
       </div>
     </div>

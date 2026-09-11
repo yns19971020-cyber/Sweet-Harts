@@ -25,14 +25,20 @@ init();
 async function init() {
   try {
     const { user } = await apiRequest('/api/auth/me');
-    if (!user || user.role === 'admin') {
-      alert('Please login as a user');
+    if (!user) {
+      alert('Please login first');
       window.location.href = '/';
       return;
     }
     currentUser = user;
-    displayUserInfo();
-    loadWallet();
+    
+    // Admin gets special UI
+    if (user.role === 'admin') {
+      showAdminDashboard();
+    } else {
+      displayUserInfo();
+      loadWallet();
+    }
   } catch (error) {
     alert('Please login first');
     window.location.href = '/';
@@ -70,7 +76,12 @@ async function displayUserInfo() {
     document.getElementById('priceSettingSection').classList.remove('hidden');
 
     if (currentUser.whatsappUnlockPrice) {
-      document.getElementById('whatsappPriceInput').value = currentUser.whatsappUnlockPrice;
+      const priceField = document.getElementById('whatsappUnlockPrice');
+      if (priceField) priceField.value = currentUser.whatsappUnlockPrice;
+    }
+    if (currentUser.whatsappNumber) {
+      const numberField = document.getElementById('whatsappNumber');
+      if (numberField) numberField.value = currentUser.whatsappNumber;
     }
   } else if (priceStatus === 'pending') {
     document.getElementById('priceActivationStatus').textContent = 'Pending Approval';
@@ -173,11 +184,16 @@ document.getElementById('btnSubmitActivation')?.addEventListener('click', async 
 });
 
 document.getElementById('btnSavePrices')?.addEventListener('click', async function() {
-  const whatsappPrice = document.getElementById('whatsappPriceInput')?.value;
-  const whatsappNumber = document.getElementById('whatsappNumberInput')?.value;
+  const whatsappPrice = document.getElementById('whatsappUnlockPrice')?.value;
+  const whatsappNum = document.getElementById('whatsappNumber')?.value;
 
-  if (!whatsappPrice) {
-    alert('Please set a WhatsApp unlock price');
+  if (!whatsappPrice || parseInt(whatsappPrice) < 100) {
+    alert('Please set a WhatsApp unlock price (minimum Rs.100)');
+    return;
+  }
+
+  if (!whatsappNum) {
+    alert('Please enter your WhatsApp number');
     return;
   }
 
@@ -186,10 +202,10 @@ document.getElementById('btnSavePrices')?.addEventListener('click', async functi
       method: 'PUT',
       body: JSON.stringify({ 
         whatsappUnlockPrice: parseInt(whatsappPrice),
-        whatsappNumber: whatsappNumber || null,
+        whatsappNumber: whatsappNum,
       }),
     });
-    alert('Prices saved successfully!');
+    alert('Settings saved successfully!');
   } catch (error) {
     alert('Failed: ' + error.message);
   }
@@ -360,3 +376,161 @@ async function loadUnreadCount() {
 }
 
 loadUnreadCount();
+
+// Admin Dashboard Functions
+function showAdminDashboard() {
+  const container = document.querySelector('.max-w-4xl');
+  container.innerHTML = `
+    <div class="bg-white shadow rounded-lg overflow-hidden">
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 flex justify-between items-center">
+        <div>
+          <h1 class="text-2xl font-bold text-white">Admin Dashboard</h1>
+          <p class="text-blue-100 text-sm">View all users and verify profiles</p>
+        </div>
+        <div class="flex gap-2">
+          <a href="/admin.html" class="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-blue-50 font-medium">
+            User Management
+          </a>
+          <a href="/" class="px-4 py-2 bg-blue-800 text-white rounded-lg hover:bg-blue-900 font-medium">
+            View Site
+          </a>
+        </div>
+      </div>
+      
+      <div class="p-6">
+        <div class="mb-4 flex gap-2">
+          <input type="text" id="searchUsers" placeholder="Search users..." class="flex-1 px-4 py-2 border rounded-lg">
+          <select id="filterStatus" class="px-4 py-2 border rounded-lg">
+            <option value="all">All Users</option>
+            <option value="pending">Pending Verification</option>
+            <option value="verified">Verified</option>
+          </select>
+        </div>
+        
+        <div id="adminUsersList" class="space-y-4">
+          <p class="text-center text-gray-500 py-4">Loading users...</p>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  loadAdminUsers();
+  
+  document.getElementById('searchUsers').addEventListener('input', filterAdminUsers);
+  document.getElementById('filterStatus').addEventListener('change', filterAdminUsers);
+}
+
+let allUsers = [];
+
+async function loadAdminUsers() {
+  try {
+    const { users } = await apiRequest('/api/admin/users');
+    allUsers = users || [];
+    renderAdminUsers(allUsers);
+  } catch (error) {
+    document.getElementById('adminUsersList').innerHTML = '<p class="text-red-500 text-center">Failed to load users</p>';
+  }
+}
+
+function filterAdminUsers() {
+  const search = document.getElementById('searchUsers').value.toLowerCase();
+  const status = document.getElementById('filterStatus').value;
+  
+  let filtered = allUsers;
+  
+  if (search) {
+    filtered = filtered.filter(u => 
+      u.username.toLowerCase().includes(search) || 
+      u.email.toLowerCase().includes(search) ||
+      (u.location && u.location.toLowerCase().includes(search))
+    );
+  }
+  
+  if (status === 'pending') {
+    filtered = filtered.filter(u => !u.verified);
+  } else if (status === 'verified') {
+    filtered = filtered.filter(u => u.verified);
+  }
+  
+  renderAdminUsers(filtered);
+}
+
+function renderAdminUsers(users) {
+  const container = document.getElementById('adminUsersList');
+  
+  if (users.length === 0) {
+    container.innerHTML = '<p class="text-gray-500 text-center py-4">No users found</p>';
+    return;
+  }
+  
+  container.innerHTML = users.map(user => `
+    <div class="border rounded-lg p-4 bg-gray-50 hover:bg-gray-100 transition">
+      <div class="flex gap-4">
+        <img src="${user.profileImage || 'https://via.placeholder.com/80'}" 
+             alt="${user.username}" 
+             class="w-20 h-20 rounded-lg object-cover border-2 ${user.verified ? 'border-green-500' : 'border-orange-400'}">
+        <div class="flex-1">
+          <div class="flex justify-between items-start">
+            <div>
+              <h3 class="font-bold text-lg">${user.username}</h3>
+              <p class="text-sm text-gray-500">${user.email}</p>
+            </div>
+            <span class="px-3 py-1 rounded-full text-sm ${user.verified ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}">
+              ${user.verified ? '✓ Verified' : '⏳ Pending'}
+            </span>
+          </div>
+          <div class="mt-2 grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-gray-600">
+            <span>📁 ${user.category || 'N/A'}</span>
+            <span>📍 ${user.location || 'N/A'}</span>
+            <span>👤 ${user.gender || 'N/A'}</span>
+            <span>📱 ${user.whatsapp || 'N/A'}</span>
+          </div>
+          <div class="mt-3 flex gap-2 flex-wrap">
+            <a href="/profile.html?id=${user.id}" target="_blank" class="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+              View Profile
+            </a>
+            ${!user.verified ? `
+              <button onclick="verifyUser('${user.id}')" class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
+                ✓ Verify
+              </button>
+            ` : ''}
+            <button onclick="viewUserDetails('${user.id}')" class="px-3 py-1 bg-gray-600 text-white text-sm rounded hover:bg-gray-700">
+              Details
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.verifyUser = async function(userId) {
+  if (confirm('Verify this user?')) {
+    try {
+      await apiRequest(`/api/admin/users/${userId}/verify`, { method: 'PUT' });
+      alert('User verified!');
+      loadAdminUsers();
+    } catch (error) {
+      alert('Error: ' + error.message);
+    }
+  }
+};
+
+window.viewUserDetails = async function(userId) {
+  const user = allUsers.find(u => u.id === userId);
+  if (!user) return;
+  
+  const details = `
+User: ${user.username}
+Email: ${user.email}
+Category: ${user.category || 'N/A'}
+Location: ${user.location || 'N/A'}
+Gender: ${user.gender || 'N/A'}
+WhatsApp: ${user.whatsapp || 'N/A'}
+Bio: ${user.bio || 'N/A'}
+Age: ${user.age || 'N/A'}
+Verified: ${user.verified ? 'Yes' : 'No'}
+Created: ${new Date(user.createdAt).toLocaleString()}
+  `;
+  alert(details);
+};
